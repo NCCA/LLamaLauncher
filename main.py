@@ -1,15 +1,17 @@
 #!/usr/bin/env -S uv run --script
+"""Llama model launcher application."""
 
 import sys
 
 from PySide6.QtWidgets import (
     QApplication,
-    QComboBox,
     QDoubleSpinBox,
+    QFileDialog,
     QFormLayout,
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QMainWindow,
     QPlainTextEdit,
     QPushButton,
@@ -18,89 +20,170 @@ from PySide6.QtWidgets import (
 )
 
 
-class LlamaLaunchApp(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Llama Launch")
-        self.setGeometry(100, 100, 800, 600)
+class ModelSelector(QWidget):
+    """Widget for selecting a GGUF model file via dialog.
 
-        # Create central widget and set layout
+    Attributes:
+        model_path: Full filesystem path of the selected model file.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.model_path = ""
+        self._setup_ui()
+
+    def _setup_ui(self) -> None:
+        layout = QHBoxLayout(self)
+        layout.addWidget(QLabel("Choose"))
+        layout.addStretch()
+
+        self._path_edit = QLineEdit()
+        self._path_edit.setReadOnly(True)
+        layout.addWidget(self._path_edit)
+
+        select_button = QPushButton("Select Model...")
+        select_button.clicked.connect(self._select_file)
+        layout.addWidget(select_button)
+
+    def _select_file(self) -> None:
+        """Open a file dialog to select a .gguf model file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select GGUF Model",
+            "",
+            "GGUF Files (*.gguf)",
+        )
+        if file_path:
+            self.model_path = file_path
+            self._path_edit.setText(file_path.rsplit("/", 1)[-1])
+
+    @property
+    def selected_name(self) -> str:
+        """Return the currently displayed model filename."""
+        return self._path_edit.text()
+
+
+class TemperatureConfig(QWidget):
+    """Widget for configuring model generation parameters.
+
+    Attributes:
+        temperature_spinbox: Controls model temperature.
+        top_p_spinbox: Controls nucleus sampling threshold.
+        top_k_spinbox: Controls top-k sampling threshold.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._setup_ui()
+
+    def _setup_ui(self) -> None:
+        layout = QFormLayout(self)
+
+        self.temperature_spinbox = QDoubleSpinBox()
+        self.top_p_spinbox = QDoubleSpinBox()
+        self.top_k_spinbox = QDoubleSpinBox()
+
+        layout.addRow("Temp:", self.temperature_spinbox)
+        layout.addRow("Top P:", self.top_p_spinbox)
+        layout.addRow("Top K:", self.top_k_spinbox)
+
+        self._set_initial_values()
+
+    def _set_initial_values(self) -> None:
+        """Set default parameter values."""
+        self.temperature_spinbox.setValue(0.3)
+        self.top_p_spinbox.setValue(0.9)
+        self.top_k_spinbox.setValue(40)
+
+
+class OutputDisplay(QPlainTextEdit):
+    """Read-only text area for displaying model output."""
+
+    def __init__(self, placeholder_text: str = "Model output will appear here...") -> None:
+        super().__init__()
+        self.setReadOnly(True)
+        self.setPlaceholderText(placeholder_text)
+
+
+class MoreOptions(QWidget):
+    """Placeholder widget for additional configuration options."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("More Options..."))
+
+
+class LlamaLaunchApp(QMainWindow):
+    """Main application window for the Llama model launcher."""
+
+    WINDOW_TITLE = "Llama Launch"
+    WINDOW_GEOMETRY = (100, 100, 800, 600)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.setWindowTitle(self.WINDOW_TITLE)
+        self.setGeometry(*self.WINDOW_GEOMETRY)
+        self._setup_ui()
+
+    def _setup_ui(self) -> None:
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
+        layout = QVBoxLayout(central_widget)
 
-        # Create model selection group
-        model_group = QGroupBox("MODEL")
-        model_layout = QVBoxLayout()
+        layout.addWidget(self._create_model_group())
+        layout.addWidget(self._create_temperature_group())
+        layout.addWidget(self._create_more_options_group())
+        layout.addWidget(self._create_output_area())
+        layout.addWidget(self._create_launch_button())
+        layout.addStretch()
 
-        # Model choice combo box
-        self.model_combo = QComboBox()
-        self.model_combo.addItem("Llama 3 8B")
-        self.model_combo.addItem("Llama 3 70B")
-        self.model_combo.addItem("Llama 2 7B")
-        self.model_combo.addItem("Llama 2 13B")
-        self.model_combo.addItem("Llama 2 70B")
+    def _create_model_group(self) -> QGroupBox:
+        group = QGroupBox("MODEL")
+        self._model_selector = ModelSelector()
+        group_layout = QVBoxLayout(group)
+        group_layout.addWidget(self._model_selector)
+        return group
 
-        # Add model choice to layout
-        model_layout.addWidget(QLabel("Choose"))
-        model_layout.addWidget(self.model_combo)
+    def _create_temperature_group(self) -> QGroupBox:
+        group = QGroupBox("TEMP")
+        self._temp_config = TemperatureConfig()
+        group_layout = QVBoxLayout(group)
+        group_layout.addWidget(self._temp_config)
+        return group
 
-        model_group.setLayout(model_layout)
+    def _create_more_options_group(self) -> QGroupBox:
+        group = QGroupBox("More Options")
+        group_layout = QVBoxLayout(group)
+        group_layout.addWidget(MoreOptions())
+        return group
 
-        # Create temperature group
-        temp_group = QGroupBox("TEMP")
-        temp_layout = QFormLayout()
-        temp_layout.addRow("Temp:", QDoubleSpinBox())
-        temp_layout.addRow("Top P:", QDoubleSpinBox())
-        temp_layout.addRow("Top K:", QDoubleSpinBox())
+    def _create_output_area(self) -> OutputDisplay:
+        output = OutputDisplay()
+        self._output_display = output
+        return output
 
-        # Set initial values
-        temp_layout.itemAt(0).widget().setText("0.3")
-        temp_layout.itemAt(1).widget().setValue(0.9)
-        temp_layout.itemAt(2).widget().setText("40")
+    def _create_launch_button(self) -> QPushButton:
+        button = QPushButton("LAUNCH")
+        button.clicked.connect(self._launch_model)
+        return button
 
-        temp_group.setLayout(temp_layout)
+    def _launch_model(self) -> None:
+        """Launch the model with current configuration settings."""
+        model_name = self._model_selector.selected_name
+        temperature = self._temp_config.temperature_spinbox.value()
+        top_p = self._temp_config.top_p_spinbox.value()
+        top_k = self._temp_config.top_k_spinbox.value()
 
-        # Create more options group
-        more_group = QGroupBox("More Options")
-        more_layout = QVBoxLayout()
-        more_layout.addWidget(QLabel("More Options..."))
-        more_group.setLayout(more_layout)
+        output = (
+            f"Model: {model_name}\n"
+            f"Temperature: {temperature}\n"
+            f"Top P: {top_p}\n"
+            f"Top K: {top_k}\n"
+            f"\nModel launched successfully!"
+        )
 
-        # Create launch button
-        launch_button = QPushButton("LAUNCH")
-        launch_button.clicked.connect(self.launch_model)
-
-        # Create output area
-        self.output_edit = QPlainTextEdit()
-        self.output_edit.setReadOnly(True)
-        self.output_edit.setPlaceholderText("Model output will appear here...")
-
-        # Add widgets to main layout
-        main_layout.addWidget(model_group)
-        main_layout.addWidget(temp_group)
-        main_layout.addWidget(more_group)
-        main_layout.addWidget(self.output_edit)
-        main_layout.addWidget(launch_button)
-
-        # Add some spacing
-        main_layout.addStretch()
-
-        # Set window title
-        self.setWindowTitle("Llama Launch")
-
-    def launch_model(self):
-        # Get current values
-        model = self.model_combo.currentText()
-        temp = self.temp_layout.itemAt(0).widget().value()
-        top_p = self.temp_layout.itemAt(1).widget().value()
-        top_k = self.temp_layout.itemAt(2).widget().value()
-
-        # Simulate model launch
-        output = f"Model: {model}\nTemperature: {temp}\nTop P: {top_p}\nTop K: {top_k}\n\nModel launched successfully!"
-
-        # Update output text
-        self.output_edit.setPlainText(output)
+        self._output_display.setPlainText(output)
 
 
 if __name__ == "__main__":
