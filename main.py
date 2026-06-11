@@ -1,104 +1,110 @@
-import json
+#!/usr/bin/env -S uv run --script
+
 import sys
 
-import requests
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QGroupBox, QHBoxLayout, QMainWindow, QPlainTextEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QDoubleSpinBox,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPlainTextEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 
-class MainWindow(QMainWindow):
+class LlamaLaunchApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("LLamaLauncher GUI")
+        self.setWindowTitle("Llama Launch")
         self.setGeometry(100, 100, 800, 600)
 
         # Create central widget and set layout
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
 
-        # Create a main vertical layout
-        main_layout = QVBoxLayout()
-        central_widget.setLayout(main_layout)
+        # Create model selection group
+        model_group = QGroupBox("MODEL")
+        model_layout = QVBoxLayout()
 
-        # Create a group box for input
-        input_group = QGroupBox("Input")
-        input_layout = QVBoxLayout()
-        input_group.setLayout(input_layout)
+        # Model choice combo box
+        self.model_combo = QComboBox()
+        self.model_combo.addItem("Llama 3 8B")
+        self.model_combo.addItem("Llama 3 70B")
+        self.model_combo.addItem("Llama 2 7B")
+        self.model_combo.addItem("Llama 2 13B")
+        self.model_combo.addItem("Llama 2 70B")
 
-        # Add a text edit for input
-        self.input_edit = QPlainTextEdit()
-        input_layout.addWidget(self.input_edit)
+        # Add model choice to layout
+        model_layout.addWidget(QLabel("Choose"))
+        model_layout.addWidget(self.model_combo)
 
-        # Add the group box to main layout
-        main_layout.addWidget(input_group)
+        model_group.setLayout(model_layout)
 
-        # Create a group box for output
-        output_group = QGroupBox("Output")
-        output_layout = QVBoxLayout()
-        output_group.setLayout(output_layout)
+        # Create temperature group
+        temp_group = QGroupBox("TEMP")
+        temp_layout = QFormLayout()
+        temp_layout.addRow("Temp:", QDoubleSpinBox())
+        temp_layout.addRow("Top P:", QDoubleSpinBox())
+        temp_layout.addRow("Top K:", QDoubleSpinBox())
 
-        # Add a text edit for output
+        # Set initial values
+        temp_layout.itemAt(0).widget().setText("0.3")
+        temp_layout.itemAt(1).widget().setValue(0.9)
+        temp_layout.itemAt(2).widget().setText("40")
+
+        temp_group.setLayout(temp_layout)
+
+        # Create more options group
+        more_group = QGroupBox("More Options")
+        more_layout = QVBoxLayout()
+        more_layout.addWidget(QLabel("More Options..."))
+        more_group.setLayout(more_layout)
+
+        # Create launch button
+        launch_button = QPushButton("LAUNCH")
+        launch_button.clicked.connect(self.launch_model)
+
+        # Create output area
         self.output_edit = QPlainTextEdit()
-        output_layout.addWidget(self.output_edit)
+        self.output_edit.setReadOnly(True)
+        self.output_edit.setPlaceholderText("Model output will appear here...")
 
-        # Add the group box to main layout
-        main_layout.addWidget(output_group)
+        # Add widgets to main layout
+        main_layout.addWidget(model_group)
+        main_layout.addWidget(temp_group)
+        main_layout.addWidget(more_group)
+        main_layout.addWidget(self.output_edit)
+        main_layout.addWidget(launch_button)
 
-        # Create a button to trigger action
-        self.action_button = QPushButton("Action")
-        self.action_button.clicked.connect(self.on_action)
-
-        # Create a horizontal layout for the button
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.action_button)
-
-        # Add button layout to main layout
-        main_layout.addLayout(button_layout)
-
-        # Add a separator
+        # Add some spacing
         main_layout.addStretch()
 
-        # Set output text to read-only
-        self.output_edit.setReadOnly(True)
+        # Set window title
+        self.setWindowTitle("Llama Launch")
 
-    def on_action(self):
-        # Get input text
-        input_text = self.input_edit.toPlainText()
+    def launch_model(self):
+        # Get current values
+        model = self.model_combo.currentText()
+        temp = self.temp_layout.itemAt(0).widget().value()
+        top_p = self.temp_layout.itemAt(1).widget().value()
+        top_k = self.temp_layout.itemAt(2).widget().value()
 
-        # Simple example: append some text to the output
-        output_text = "Hello from LLamaLauncher!\n"
-        self.output_edit.appendPlainText(output_text)
+        # Simulate model launch
+        output = f"Model: {model}\nTemperature: {temp}\nTop P: {top_p}\nTop K: {top_k}\n\nModel launched successfully!"
 
-        # Simulate LLM interaction
-        self.handle_llm_interaction(input_text)
-
-    def handle_llm_interaction(self, input_text):
-        # This is a placeholder for actual LLM interaction
-        # For now, we'll simulate a response
-        if input_text == "":
-            return
-
-        # Simulate API call
-        try:
-            # For demonstration, we'll use a placeholder API endpoint
-            # In a real application, you'd replace this with your actual LLM API
-            response = requests.post("http://localhost:8000/api/v1/generate", data=json.dumps({"prompt": input_text}))
-            if response.status_code == 200:
-                result = response.json()
-                # Append the result to output
-                self.output_edit.appendPlainText(f"LLM Response: {result.get('response', '')}\n")
-            else:
-                self.output_edit.appendPlainText(f"Error: {response.status_code} - {response.text}\n")
-        except Exception as e:
-            self.output_edit.appendPlainText(f"Error: {str(e)}\n")
-
-
-def main():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+        # Update output text
+        self.output_edit.setPlainText(output)
 
 
 if __name__ == "__main__":
-    main()
+    app = QApplication(sys.argv)
+    window = LlamaLaunchApp()
+    window.show()
+    sys.exit(app.exec())
