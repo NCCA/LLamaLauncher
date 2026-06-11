@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LlamaLaunchApp</class>
+ <widget class="QMainWindow" name="LlamaLaunchApp">
+  <property name="geometry">
+   <rect>
+    <x>100</x>
+    <y>100</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Llama Launch</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QGroupBox" name="modelGroup">
+      <property name="title">
+       <string>MODEL</string>
+      </property>
+      <layout class="QVBoxLayout" name="modelGroupLayout">
+       <item>
+        <layout class="QHBoxLayout" name="modelSelectorLayout">
+         <item>
+          <widget class="QLabel" name="chooseLabel">
+           <property name="text">
+            <string>Choose</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="modelSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="stretch">
+            <number>1</number>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="modelPathEdit">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="selectModelButton">
+           <property name="text">
+            <string>Select Model...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="tempGroup">
+      <property name="title">
+       <string>TEMP</string>
+      </property>
+      <layout class="QVBoxLayout" name="tempGroupLayout">
+       <item>
+        <layout class="QFormLayout" name="tempFormLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="tempLabel">
+           <property name="text">
+            <string>Temp:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="temperatureSpinbox">
+           <property name="value">
+            <double>0.300000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="topPLabel">
+           <property name="text">
+            <string>Top P:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="topPSpinbox">
+           <property name="value">
+            <double>0.900000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="topKLabel">
+           <property name="text">
+            <string>Top K:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QDoubleSpinBox" name="topKSpinbox">
+           <property name="value">
+            <double>40.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="moreOptionsGroup">
+      <property name="title">
+       <string>More Options</string>
+      </property>
+      <layout class="QVBoxLayout" name="moreOptionsLayout">
+       <item>
+        <widget class="QLabel" name="moreOptionsLabel">
+         <property name="text">
+          <string>More Options...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="outputDisplay">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="placeholderText">
+       <string>Model output will appear here...</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="launchButton">
+      <property name="text">
+       <string>LAUNCH</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="stretch">
+       <number>1</number>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
