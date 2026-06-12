@@ -4,6 +4,7 @@
 import sys
 from pathlib import Path
 
+from PySide6.QtCore import QProcess
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -22,6 +23,11 @@ class LlamaLaunchApp(QMainWindow):
 
     def __init__(self) -> None:
         super().__init__()
+        self._process = QProcess(self)
+        self._process.readyReadStandardOutput.connect(self._on_stdout)
+        self._process.readyReadStandardError.connect(self._on_stderr)
+        self._process.finished.connect(self._on_finished)
+        self._process.errorOccurred.connect(self._on_error)
         self._setup_ui()
         self._connect_signals()
 
@@ -78,28 +84,79 @@ class LlamaLaunchApp(QMainWindow):
             self.mmproj_path_edit.setText(file_path.rsplit("/", 1)[-1])
 
     def _launch_model(self) -> None:
-        """Launch the model with current configuration settings."""
-        model_name = self.model_path_edit.text()
+        """Launch the llama-server binary with current configuration.
+
+        Builds the command-line arguments from the UI fields and starts
+        ``llama-server`` via QProcess.  Live stdout/stderr output is
+        streamed into ``output_display``.
+        """
+        model_path = self.model_path_edit.text()
+        if not model_path:
+            self.output_display.appendPlainText("Error: no model selected.")
+            return
+
+        if self._process.state() == QProcess.Running:
+            self.output_display.appendPlainText("A model is already running. Stop it first.")
+            return
+
         temperature = self.temperature_spinbox.value()
         top_p = self.top_p_spinbox.value()
         top_k = self.top_k_spinbox.value()
 
-        mmproj_name = self.mmproj_path_edit.text()
+        mmproj_path = self.mmproj_path_edit.text()
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
 
-        flags = []
-        if mmproj_name:
-            flags.append(f"--mmproj {mmproj_name}")
+        # Build command: llama-server --model ... --temp ... ...
+        cmd = [
+            "llama-server",
+            "--model",
+            model_path,
+            "--temp",
+            str(temperature),
+            "--top-p",
+            str(top_p),
+            "--top-k",
+            str(top_k),
+        ]
+
+        if mmproj_path:
+            cmd.extend(["--mmproj", mmproj_path])
             if no_mmproj_offload:
-                flags.append("--no-mmproj-offload")
+                cmd.append("--no-mmproj-offload")
 
-        flag_str = " ".join(flags)
-        output = f"Model: {model_name}\nTemperature: {temperature}\nTop P: {top_p}\nTop K: {top_k}\n"
-        if flag_str:
-            output += f"\nFlags: {flag_str}\n"
-        output += "\nModel launched successfully!"
+        self.output_display.clear()
+        self.output_display.appendPlainText(f"Launching: {' '.join(cmd)}\n---\n")
 
-        self.output_display.setPlainText(output)
+        # Use two-argument form: program + arguments list (args must NOT include the program)
+        self._process.start(cmd[0], cmd[1:])
+
+    # ------------------------------------------------------------------
+    # QProcess output slots
+    # ------------------------------------------------------------------
+
+    def _on_stdout(self) -> None:
+        """Append stdout from the child process to the output display."""
+        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
+        if data:
+            self.output_display.appendPlainText(data)
+
+    def _on_stderr(self) -> None:
+        """Append stderr from the child process to the output display."""
+        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
+        if data:
+            self.output_display.appendPlainText(data)
+
+    def _on_error(self, error: QProcess.ProcessError) -> None:
+        """Called when the process encounters an error (e.g. not found)."""
+        msg = f"Error launching process: {error}"
+        self.output_display.appendPlainText(msg)
+
+    def _on_finished(self, code: int, status: QProcess.ExitStatus) -> None:
+        """Called when the child process exits."""
+        if status == QProcess.ExitStatus.NormalExit:
+            self.output_display.appendPlainText(f"\n--- Process exited with code {code} ---")
+        else:
+            self.output_display.appendPlainText(f"\n--- Process terminated abnormally (code {code}) ---")
 
 
 if __name__ == "__main__":
