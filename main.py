@@ -60,7 +60,12 @@ class LlamaLaunchApp(QMainWindow):
     # ------------------------------------------------------------------
 
     def _select_model(self) -> None:
-        """Open a file dialog to select a .gguf model file."""
+        """Open a file dialog to select a .gguf model file.
+
+        Stores the full path as a custom property on the line edit
+        (accessible via ``getProperty("fullPath")``) while displaying
+        only the short filename in the UI.
+        """
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select GGUF Model",
@@ -69,10 +74,16 @@ class LlamaLaunchApp(QMainWindow):
         )
         if file_path:
             self._model_path = file_path
+            self.model_path_edit.setProperty("fullPath", file_path)
             self.model_path_edit.setText(file_path.rsplit("/", 1)[-1])
 
     def _select_mmproj(self) -> None:
-        """Open a file dialog to select a .gguf mmproj file."""
+        """Open a file dialog to select a .gguf mmproj file.
+
+        Stores the full path as a custom property on the line edit
+        (accessible via ``getProperty("fullPath")``) while displaying
+        only the short filename in the UI.
+        """
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select Multi-Modal Projector",
@@ -81,6 +92,7 @@ class LlamaLaunchApp(QMainWindow):
         )
         if file_path:
             self._mmproj_path = file_path
+            self.mmproj_path_edit.setProperty("fullPath", file_path)
             self.mmproj_path_edit.setText(file_path.rsplit("/", 1)[-1])
 
     def _launch_model(self) -> None:
@@ -90,7 +102,7 @@ class LlamaLaunchApp(QMainWindow):
         ``llama-server`` via QProcess.  Live stdout/stderr output is
         streamed into ``output_display``.
         """
-        model_path = self.model_path_edit.text()
+        model_path = self.model_path_edit.property("fullPath")
         if not model_path:
             self.output_display.appendPlainText("Error: no model selected.")
             return
@@ -103,7 +115,7 @@ class LlamaLaunchApp(QMainWindow):
         top_p = self.top_p_spinbox.value()
         top_k = self.top_k_spinbox.value()
 
-        mmproj_path = self.mmproj_path_edit.text()
+        mmproj_path = self.mmproj_path_edit.property("fullPath")
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
 
         # Build command: llama-server --model ... --temp ... ...
