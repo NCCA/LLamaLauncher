@@ -124,9 +124,7 @@ class LlamaLaunchApp(QMainWindow):
     def _force_kill_if_needed(self) -> None:
         """Force kill the process if graceful termination did not work."""
         if self._process.state() == QProcess.Running:
-            self.output_display.appendPlainText(
-                "Server didn't stop gracefully. Force killing..."
-            )
+            self.output_display.appendPlainText("Server didn't stop gracefully. Force killing...")
             self._process.kill()
 
     def _reset_launch_button(self) -> None:
@@ -152,6 +150,7 @@ class LlamaLaunchApp(QMainWindow):
 
         mmproj_path = self.mmproj_path_edit.property("fullPath")
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
+        api_key = self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
 
         # Build command: llama-server --model ... --temp ... ...
         cmd = [
@@ -164,6 +163,8 @@ class LlamaLaunchApp(QMainWindow):
             str(top_p),
             "--top-k",
             str(top_k),
+            "--api-key",
+            api_key,
         ]
 
         if mmproj_path:
@@ -184,21 +185,13 @@ class LlamaLaunchApp(QMainWindow):
 
     def _on_stdout(self) -> None:
         """Append stdout from the child process to the output display."""
-        data = (
-            self._process.readAllStandardOutput()
-            .data()
-            .decode("utf-8", errors="replace")
-        )
+        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
         if data:
             self.output_display.appendPlainText(data)
 
     def _on_stderr(self) -> None:
         """Append stderr from the child process to the output display."""
-        data = (
-            self._process.readAllStandardError()
-            .data()
-            .decode("utf-8", errors="replace")
-        )
+        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
         if data:
             self.output_display.appendPlainText(data)
 
@@ -211,13 +204,9 @@ class LlamaLaunchApp(QMainWindow):
     def _on_finished(self, code: int, status: QProcess.ExitStatus) -> None:
         """Called when the child process exits."""
         if status == QProcess.ExitStatus.NormalExit:
-            self.output_display.appendPlainText(
-                f"\n--- Process exited with code {code} ---"
-            )
+            self.output_display.appendPlainText(f"\n--- Process exited with code {code} ---")
         else:
-            self.output_display.appendPlainText(
-                f"\n--- Process terminated abnormally (code {code}) ---"
-            )
+            self.output_display.appendPlainText(f"\n--- Process terminated abnormally (code {code}) ---")
         self._reset_launch_button()
 
 
