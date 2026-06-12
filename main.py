@@ -4,6 +4,7 @@
 import sys
 from pathlib import Path
 
+from PySide6.QtCore import QObject
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
     QApplication,
@@ -39,13 +40,13 @@ class LlamaLaunchApp(QMainWindow):
         # Store references to every interactive widget by the names used
         # in the .ui file so that other methods can access them.
         central = ui_instance.centralwidget
-        self.model_path_edit = central.findChild(type(central.model_path_edit), "model_path_edit")
-        self.select_model_button = central.findChild(type(central.select_model_button), "select_model_button")
-        self.temperature_spinbox = central.findChild(type(central.temperature_spinbox), "temperature_spinbox")
-        self.top_p_spinbox = central.findChild(type(central.top_p_spinbox), "top_p_spinbox")
-        self.top_k_spinbox = central.findChild(type(central.top_k_spinbox), "top_k_spinbox")
-        self.output_display = central.findChild(type(central.output_display), "output_display")
-        self.launch_button = central.findChild(type(central.launch_button), "launch_button")
+        self.model_path_edit = central.findChild(QObject, "model_path_edit")
+        self.select_model_button = central.findChild(QObject, "select_model_button")
+        self.temperature_spinbox = central.findChild(QObject, "temperature_spinbox")
+        self.top_p_spinbox = central.findChild(QObject, "top_p_spinbox")
+        self.top_k_spinbox = central.findChild(QObject, "top_k_spinbox")
+        self.output_display = central.findChild(QObject, "output_display")
+        self.launch_button = central.findChild(QObject, "launch_button")
 
     # ------------------------------------------------------------------
     # Signal connections
