@@ -1,0 +1,50 @@
+0.00.142.547 I log_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.142.549 I device_info:
+0.00.142.550 I   - BLAS    : Accelerate (0 MiB, 0 MiB free)
+0.00.142.556 I   - MTL0    : Apple M4 Max (27648 MiB, 27647 MiB free)
+0.00.142.560 I   - CPU     : Apple M4 Max (36864 MiB, 36864 MiB free)
+0.00.142.567 I system_info: n_threads = 10 (n_threads_batch = 10) / 14 | MTL : EMBED_LIBRARY = 1 | CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | MATMUL_INT8 = 1 | DOTPROD = 1 | SME = 1 | ACCELERATE = 1 | OPENMP = 1 | REPACK = 1 | 
+0.00.142.567 I srv  llama_server: n_parallel is set to auto, using n_parallel = 4 and kv_unified = true
+0.00.142.581 I srv          init: running without SSL
+0.00.142.615 I srv          init: api_keys: ****2345
+0.00.142.618 I srv          init: using 13 threads for HTTP server
+0.00.142.662 I srv         start: binding port with default address family
+0.00.143.994 I srv  llama_server: loading model
+0.00.144.001 I srv    load_model: loading model '/Users/jmacey/teaching/AI_Models/Qwen3VL-4B-Instruct-Q4_K_M.gguf'
+0.00.485.364 I srv    load_model: [mtmd] estimated worst-case memory usage of mmproj is 1177.90 MiB
+0.00.485.377 I common_init_result: fitting params to device memory ...
+0.00.485.377 I common_init_result: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.00.699.865 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.00.839.593 W llama_context: n_ctx_seq (36096) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.01.086.275 I common_init_from_params: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.01.120.218 W load_hparams: Qwen-VL models require at minimum 1024 image tokens to function correctly on grounding tasks
+0.01.120.220 W load_hparams: if you encounter problems with accuracy, try adding --image-min-tokens 1024
+0.01.120.220 W load_hparams: more info: https://github.com/ggml-org/llama.cpp/issues/16842
+
+0.01.349.375 I srv    load_model: loaded multimodal model, '/Users/jmacey/teaching/AI_Models/mmproj-Qwen3VL-4B-Instruct-F16.gguf'
+0.01.349.379 I srv    load_model: initializing slots, n_slots = 4
+0.01.397.257 W common_speculative_init: no implementations specified for speculative decoding
+0.01.397.260 I slot   load_model: id  0 | task -1 | new slot, n_ctx = 36096
+0.01.397.262 I slot   load_model: id  1 | task -1 | new slot, n_ctx = 36096
+0.01.397.263 I slot   load_model: id  2 | task -1 | new slot, n_ctx = 36096
+0.01.397.263 I slot   load_model: id  3 | task -1 | new slot, n_ctx = 36096
+0.01.397.284 I srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+0.01.397.284 I srv    load_model: use `--cache-ram 0` to disable the prompt cache
+0.01.397.285 I srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+0.01.397.285 I srv    load_model: context checkpoints enabled, max = 32, min spacing = 256
+0.01.397.304 I srv          init: idle slots will be saved to prompt cache and cleared upon starting a new task
+0.01.401.084 I init: chat template, example_format: '<|im_start|>system
+You are a helpful assistant<|im_end|>
+<|im_start|>user
+Hello<|im_end|>
+<|im_start|>assistant
+Hi there<|im_end|>
+<|im_start|>user
+How are you?<|im_end|>
+<|im_start|>assistant
+'
+0.01.402.676 I srv          init: init: chat template, thinking = 0
+0.01.402.684 I srv  llama_server: model loaded
+0.01.402.687 I srv  llama_server: server is listening on http://127.0.0.1:8080
+0.01.402.688 I srv  update_slots: all slots are idle
+0.02.158.973 I srv    operator(): operator(): cleaning up before exit...

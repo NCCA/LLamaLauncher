@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ui version="4.0">
  <class>LlamaLaunchApp</class>
- <widget class="QMainWindow" name="LlamaLaunchApp">
+ <widget class="QWidget" name="LlamaLaunchApp">
   <property name="geometry">
    <rect>
     <x>100</x>
@@ -60,7 +60,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="temp_group">
+     <widget class="QGroupBox" name="tempGroup">
       <property name="title">
        <string>TEMP</string>
       </property>
