@@ -46,6 +46,7 @@ class LlamaLaunchApp(QMainWindow):
     def _connect_signals(self) -> None:
         """Connect widget signals to their slot methods."""
         self.select_model_button.clicked.connect(self._select_model)
+        self.select_mmproj_button.clicked.connect(self._select_mmproj)
         self.launch_button.clicked.connect(self._launch_model)
 
     # ------------------------------------------------------------------
@@ -64,6 +65,18 @@ class LlamaLaunchApp(QMainWindow):
             self._model_path = file_path
             self.model_path_edit.setText(file_path.rsplit("/", 1)[-1])
 
+    def _select_mmproj(self) -> None:
+        """Open a file dialog to select a .gguf mmproj file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Multi-Modal Projector",
+            "",
+            "GGUF Files (*.gguf)",
+        )
+        if file_path:
+            self._mmproj_path = file_path
+            self.mmproj_path_edit.setText(file_path.rsplit("/", 1)[-1])
+
     def _launch_model(self) -> None:
         """Launch the model with current configuration settings."""
         model_name = self.model_path_edit.text()
@@ -71,13 +84,20 @@ class LlamaLaunchApp(QMainWindow):
         top_p = self.top_p_spinbox.value()
         top_k = self.top_k_spinbox.value()
 
-        output = (
-            f"Model: {model_name}\n"
-            f"Temperature: {temperature}\n"
-            f"Top P: {top_p}\n"
-            f"Top K: {top_k}\n"
-            f"\nModel launched successfully!"
-        )
+        mmproj_name = self.mmproj_path_edit.text()
+        no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
+
+        flags = []
+        if mmproj_name:
+            flags.append(f"--mmproj {mmproj_name}")
+            if no_mmproj_offload:
+                flags.append("--no-mmproj-offload")
+
+        flag_str = " ".join(flags)
+        output = f"Model: {model_name}\nTemperature: {temperature}\nTop P: {top_p}\nTop K: {top_k}\n"
+        if flag_str:
+            output += f"\nFlags: {flag_str}\n"
+        output += "\nModel launched successfully!"
 
         self.output_display.setPlainText(output)
 
