@@ -137,7 +137,9 @@ class LlamaLaunchApp(QMainWindow):
     def _force_kill_if_needed(self) -> None:
         """Force kill the process if graceful termination did not work."""
         if self._process.state() == QProcess.Running:
-            self.output_display.appendPlainText("Server didn't stop gracefully. Force killing...")
+            self.output_display.appendPlainText(
+                "Server didn't stop gracefully. Force killing..."
+            )
             self._process.kill()
 
     def _reset_launch_button(self) -> None:
@@ -163,7 +165,9 @@ class LlamaLaunchApp(QMainWindow):
 
         mmproj_path = self.mmproj_path_edit.property("fullPath")
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
-        api_key = self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
+        api_key = (
+            self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
+        )
 
         # Build command: llama-server --model ... --temp ... ...
         cmd = [
@@ -218,7 +222,11 @@ class LlamaLaunchApp(QMainWindow):
         Also watches for the server URL pattern (http://HOST:PORT) in the
         output and auto-refreshes the web view once the server is ready.
         """
-        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
+        data = (
+            self._process.readAllStandardOutput()
+            .data()
+            .decode("utf-8", errors="replace")
+        )
         if data:
             self.output_display.appendPlainText(data)
             self._check_and_refresh()
@@ -229,7 +237,11 @@ class LlamaLaunchApp(QMainWindow):
         Also watches for the server URL pattern (http://HOST:PORT) in the
         output and auto-refreshes the web view once the server is ready.
         """
-        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
+        data = (
+            self._process.readAllStandardError()
+            .data()
+            .decode("utf-8", errors="replace")
+        )
         if data:
             self.output_display.appendPlainText(data)
             self._check_and_refresh()
@@ -254,7 +266,9 @@ class LlamaLaunchApp(QMainWindow):
         """Reload the server web view to fetch the freshly started server."""
         url = QUrl(self._server_url)
         self.server_web_view.setUrl(url)
-        self.output_display.appendPlainText(f"\n[Server ready — refreshed web view at {self._server_url}]")
+        self.output_display.appendPlainText(
+            f"\n[Server ready — refreshed web view at {self._server_url}]"
+        )
 
     def _on_error(self, error: QProcess.ProcessError) -> None:
         """Called when the process encounters an error (e.g. not found)."""
@@ -265,16 +279,26 @@ class LlamaLaunchApp(QMainWindow):
     def _on_finished(self, code: int, status: QProcess.ExitStatus) -> None:
         """Called when the child process exits."""
         if status == QProcess.ExitStatus.NormalExit:
-            self.output_display.appendPlainText(f"\n--- Process exited with code {code} ---")
+            self.output_display.appendPlainText(
+                f"\n--- Process exited with code {code} ---"
+            )
         else:
-            self.output_display.appendPlainText(f"\n--- Process terminated abnormally (code {code}) ---")
+            self.output_display.appendPlainText(
+                f"\n--- Process terminated abnormally (code {code}) ---"
+            )
         self._reset_launch_button()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Llama model launcher application.")
-    parser.add_argument("--host", default="127.0.0.1", help="Host address for the server (default: 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=8080, help="Port for the server (default: 8080)")
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host address for the server (default: 127.0.0.1)",
+    )
+    parser.add_argument(
+        "--port", type=int, default=8080, help="Port for the server (default: 8080)"
+    )
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
