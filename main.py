@@ -3,13 +3,17 @@
 
 import sys
 from pathlib import Path
+from typing import List
 
-from PySide6.QtCore import QObject
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
     QApplication,
+    QDoubleSpinBox,
     QFileDialog,
+    QLineEdit,
     QMainWindow,
+    QPlainTextEdit,
+    QPushButton,
 )
 
 
@@ -37,16 +41,37 @@ class LlamaLaunchApp(QMainWindow):
 
         self.setCentralWidget(ui_instance.centralwidget)
 
-        # Store references to every interactive widget by the names used
-        # in the .ui file so that other methods can access them.
+        # Auto-discover interactive widgets by type.
+        # For types with a single instance we unpack directly.
+        # For types with multiple instances we sort by objectName()
+        # so the assignment order is deterministic (alphabetical).
         central = ui_instance.centralwidget
-        self.model_path_edit = central.findChild(QObject, "model_path_edit")
-        self.select_model_button = central.findChild(QObject, "select_model_button")
-        self.temperature_spinbox = central.findChild(QObject, "temperature_spinbox")
-        self.top_p_spinbox = central.findChild(QObject, "top_p_spinbox")
-        self.top_k_spinbox = central.findChild(QObject, "top_k_spinbox")
-        self.output_display = central.findChild(QObject, "output_display")
-        self.launch_button = central.findChild(QObject, "launch_button")
+        line_edits: List[QLineEdit] = central.findChildren(QLineEdit)
+        push_buttons: List[QPushButton] = sorted(
+            central.findChildren(QPushButton), key=lambda w: w.objectName()
+        )
+        spinboxes: List[QDoubleSpinBox] = sorted(
+            central.findChildren(QDoubleSpinBox), key=lambda w: w.objectName()
+        )
+        plain_text_edits: List[QPlainTextEdit] = central.findChildren(QPlainTextEdit)
+
+        if len(line_edits) != 1:
+            raise RuntimeError(f"Expected 1 QLineEdit, found {len(line_edits)}")
+        if len(push_buttons) != 2:
+            raise RuntimeError(f"Expected 2 QPushButton, found {len(push_buttons)}")
+        if len(spinboxes) != 3:
+            raise RuntimeError(f"Expected 3 QDoubleSpinBox, found {len(spinboxes)}")
+        if len(plain_text_edits) != 1:
+            raise RuntimeError(
+                f"Expected 1 QPlainTextEdit, found {len(plain_text_edits)}"
+            )
+
+        self.model_path_edit = line_edits[0]
+        # Alphabetical order: launch_button < select_model_button
+        self.launch_button, self.select_model_button = push_buttons
+        # Alphabetical order: temperature < top_k < top_p
+        self.temperature_spinbox, self.top_k_spinbox, self.top_p_spinbox = spinboxes
+        self.output_display = plain_text_edits[0]
 
     # ------------------------------------------------------------------
     # Signal connections
