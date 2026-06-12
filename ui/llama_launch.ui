@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <ui version="4.0">
  <class>LlamaLaunchApp</class>
  <widget class="QMainWindow" name="LlamaLaunchApp">
@@ -20,18 +20,18 @@
       <property name="title">
        <string>MODEL</string>
       </property>
-      <layout class="QVBoxLayout" name="modelGroupLayout">
+      <layout class="QVBoxLayout" name="model_group_layout">
        <item>
-        <layout class="QHBoxLayout" name="modelSelectorLayout">
+        <layout class="QHBoxLayout" name="model_selector_layout">
          <item>
-          <widget class="QLabel" name="chooseLabel">
+          <widget class="QLabel" name="choose_label">
            <property name="text">
             <string>Choose</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="modelSpacer">
+          <spacer name="model_spacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -41,14 +41,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="modelPathEdit">
+          <widget class="QLineEdit" name="model_path_edit">
            <property name="readOnly">
             <bool>true</bool>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="selectModelButton">
+          <widget class="QPushButton" name="select_model_button">
            <property name="text">
             <string>Select Model...</string>
            </property>
@@ -64,46 +64,46 @@
       <property name="title">
        <string>TEMP</string>
       </property>
-      <layout class="QVBoxLayout" name="tempGroupLayout">
+      <layout class="QVBoxLayout" name="temp_group_layout">
        <item>
-        <layout class="QFormLayout" name="tempFormLayout">
+        <layout class="QFormLayout" name="temp_form_layout">
          <item row="0" column="0">
-          <widget class="QLabel" name="tempLabel">
+          <widget class="QLabel" name="temp_label">
            <property name="text">
             <string>Temp:</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="temperatureSpinbox">
+          <widget class="QDoubleSpinBox" name="temperature_spinbox">
            <property name="value">
             <double>0.300000000000000</double>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="topPLabel">
+          <widget class="QLabel" name="top_p_label">
            <property name="text">
             <string>Top P:</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QDoubleSpinBox" name="topPSpinbox">
+          <widget class="QDoubleSpinBox" name="top_p_spinbox">
            <property name="value">
             <double>0.900000000000000</double>
            </property>
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="topKLabel">
+          <widget class="QLabel" name="top_k_label">
            <property name="text">
             <string>Top K:</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QDoubleSpinBox" name="topKSpinbox">
+          <widget class="QDoubleSpinBox" name="top_k_spinbox">
            <property name="value">
             <double>40.000000000000000</double>
            </property>
@@ -119,9 +119,9 @@
       <property name="title">
        <string>More Options</string>
       </property>
-      <layout class="QVBoxLayout" name="moreOptionsLayout">
+      <layout class="QVBoxLayout" name="more_options_layout">
        <item>
-        <widget class="QLabel" name="moreOptionsLabel">
+        <widget class="QLabel" name="more_options_label">
          <property name="text">
           <string>More Options...</string>
          </property>
@@ -131,7 +131,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="outputDisplay">
+     <widget class="QPlainTextEdit" name="output_display">
       <property name="readOnly">
        <bool>true</bool>
       </property>
@@ -141,14 +141,14 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="launchButton">
+     <widget class="QPushButton" name="launch_button">
       <property name="text">
        <string>LAUNCH</string>
       </property>
      </widget>
     </item>
     <item>
-     <spacer name="verticalSpacer">
+     <spacer name="vertical_spacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -160,6 +160,6 @@
    </layout>
   </widget>
  </widget>
- <resources/>
- <connections/>
+ <resources />
+ <connections />
 </ui>
