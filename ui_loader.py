@@ -41,6 +41,13 @@ def load_ui(ui_file_path: Union[str, Path], parent: T) -> QWidget:
         if name:
             setattr(parent, name, layout)
 
+    # Also capture the top-level layout if it wasn't found by findChildren
+    main_layout = loaded_ui.layout()
+    if main_layout:
+        name = main_layout.objectName()
+        if name and not hasattr(parent, name):
+            setattr(parent, name, main_layout)
+
     if isinstance(parent, QDialog):
         if loaded_ui.layout():
             parent.setLayout(loaded_ui.layout())
@@ -48,6 +55,8 @@ def load_ui(ui_file_path: Union[str, Path], parent: T) -> QWidget:
         parent.resize(loaded_ui.size())
     elif isinstance(parent, QMainWindow):
         parent.setCentralWidget(loaded_ui)
+        parent.setWindowTitle(loaded_ui.windowTitle())
+        parent.resize(loaded_ui.size())
     else:
         # Plain QWidget: embed loaded_ui via a zero-margin layout so its
         # contents fill the parent window.

@@ -13,10 +13,9 @@
   <property name="windowTitle">
    <string>Llama Launch</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QGroupBox" name="model_group">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="model_group">
       <property name="title">
        <string>MODEL</string>
       </property>
@@ -158,7 +157,6 @@
      </spacer>
     </item>
    </layout>
-  </widget>
  </widget>
  <resources />
  <connections />

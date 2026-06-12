@@ -3,18 +3,11 @@
 
 import sys
 from pathlib import Path
-from typing import List
 
-from PySide6.QtCore import QObject
-from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import (
     QApplication,
-    QDoubleSpinBox,
     QFileDialog,
-    QLineEdit,
     QMainWindow,
-    QPlainTextEdit,
-    QPushButton,
 )
 
 from ui_loader import load_ui
