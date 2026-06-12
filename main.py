@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QProcess
+from PySide6.QtCore import QProcess, QTimer
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -53,7 +53,8 @@ class LlamaLaunchApp(QMainWindow):
         """Connect widget signals to their slot methods."""
         self.select_model_button.clicked.connect(self._select_model)
         self.select_mmproj_button.clicked.connect(self._select_mmproj)
-        self.launch_button.clicked.connect(self._launch_model)
+        self.model_path_edit.textChanged.connect(self._on_model_selection_changed)
+        self.launch_button.clicked.connect(self._toggle_launch)
 
     # ------------------------------------------------------------------
     # Slots
@@ -76,6 +77,7 @@ class LlamaLaunchApp(QMainWindow):
             self._model_path = file_path
             self.model_path_edit.setProperty("fullPath", file_path)
             self.model_path_edit.setText(file_path.rsplit("/", 1)[-1])
+            self._on_model_selection_changed()
 
     def _select_mmproj(self) -> None:
         """Open a file dialog to select a .gguf mmproj file.
@@ -95,6 +97,43 @@ class LlamaLaunchApp(QMainWindow):
             self.mmproj_path_edit.setProperty("fullPath", file_path)
             self.mmproj_path_edit.setText(file_path.rsplit("/", 1)[-1])
 
+    def _on_model_selection_changed(self) -> None:
+        """Enable launch button when a model is selected, disable otherwise."""
+        has_model = bool(self.model_path_edit.property("fullPath"))
+        is_running = self._process.state() == QProcess.Running
+        self.launch_button.setEnabled(has_model and not is_running)
+
+    def _toggle_launch(self) -> None:
+        """Launch or stop the llama-server based on current process state."""
+        if self._process.state() == QProcess.Running:
+            self._stop_model()
+        else:
+            self._launch_model()
+
+    def _stop_model(self) -> None:
+        """Stop the llama-server gracefully.
+
+        Sends SIGTERM (like pressing Ctrl+C) so the server can shut down
+        cleanly. If it does not stop within 2 seconds, falls back to
+        SIGKILL.
+        """
+        self._process.terminate()
+        self.output_display.appendPlainText("Stopping server... (sent SIGTERM)")
+        QTimer.singleShot(2000, self._force_kill_if_needed)
+
+    def _force_kill_if_needed(self) -> None:
+        """Force kill the process if graceful termination did not work."""
+        if self._process.state() == QProcess.Running:
+            self.output_display.appendPlainText(
+                "Server didn't stop gracefully. Force killing..."
+            )
+            self._process.kill()
+
+    def _reset_launch_button(self) -> None:
+        """Reset the launch button to its default state."""
+        self.launch_button.setText("LAUNCH")
+        self._on_model_selection_changed()
+
     def _launch_model(self) -> None:
         """Launch the llama-server binary with current configuration.
 
@@ -105,10 +144,6 @@ class LlamaLaunchApp(QMainWindow):
         model_path = self.model_path_edit.property("fullPath")
         if not model_path:
             self.output_display.appendPlainText("Error: no model selected.")
-            return
-
-        if self._process.state() == QProcess.Running:
-            self.output_display.appendPlainText("A model is already running. Stop it first.")
             return
 
         temperature = self.temperature_spinbox.value()
@@ -141,6 +176,7 @@ class LlamaLaunchApp(QMainWindow):
 
         # Use two-argument form: program + arguments list (args must NOT include the program)
         self._process.start(cmd[0], cmd[1:])
+        self.launch_button.setText("STOP")
 
     # ------------------------------------------------------------------
     # QProcess output slots
@@ -148,13 +184,21 @@ class LlamaLaunchApp(QMainWindow):
 
     def _on_stdout(self) -> None:
         """Append stdout from the child process to the output display."""
-        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
+        data = (
+            self._process.readAllStandardOutput()
+            .data()
+            .decode("utf-8", errors="replace")
+        )
         if data:
             self.output_display.appendPlainText(data)
 
     def _on_stderr(self) -> None:
         """Append stderr from the child process to the output display."""
-        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
+        data = (
+            self._process.readAllStandardError()
+            .data()
+            .decode("utf-8", errors="replace")
+        )
         if data:
             self.output_display.appendPlainText(data)
 
@@ -162,13 +206,19 @@ class LlamaLaunchApp(QMainWindow):
         """Called when the process encounters an error (e.g. not found)."""
         msg = f"Error launching process: {error}"
         self.output_display.appendPlainText(msg)
+        self._reset_launch_button()
 
     def _on_finished(self, code: int, status: QProcess.ExitStatus) -> None:
         """Called when the child process exits."""
         if status == QProcess.ExitStatus.NormalExit:
-            self.output_display.appendPlainText(f"\n--- Process exited with code {code} ---")
+            self.output_display.appendPlainText(
+                f"\n--- Process exited with code {code} ---"
+            )
         else:
-            self.output_display.appendPlainText(f"\n--- Process terminated abnormally (code {code}) ---")
+            self.output_display.appendPlainText(
+                f"\n--- Process terminated abnormally (code {code}) ---"
+            )
+        self._reset_launch_button()
 
 
 if __name__ == "__main__":
