@@ -2,10 +2,11 @@
 """Llama model launcher application."""
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QProcess, QTimer
+from PySide6.QtCore import QProcess, QTimer, QUrl
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (
     QApplication,
@@ -32,6 +33,8 @@ class LlamaLaunchApp(QMainWindow):
         self._process.errorOccurred.connect(self._on_error)
         self._host = host
         self._port = port
+        self._server_url: str = f"http://{host}:{port}"
+        self._auto_refresh_done: bool = False
         self._setup_ui()
         self._connect_signals()
         self._init_web_view()
@@ -191,6 +194,9 @@ class LlamaLaunchApp(QMainWindow):
 
         cmd.extend(["--host", host, "--port", str(port)])
 
+        self._server_url = f"http://{host}:{port}"
+        self._auto_refresh_done = False
+
         self.output_display.clear()
         self.output_display.appendPlainText(f"Launching: {' '.join(cmd)}\n---\n")
 
@@ -207,16 +213,48 @@ class LlamaLaunchApp(QMainWindow):
     # ------------------------------------------------------------------
 
     def _on_stdout(self) -> None:
-        """Append stdout from the child process to the output display."""
+        """Append stdout from the child process to the output display.
+
+        Also watches for the server URL pattern (http://HOST:PORT) in the
+        output and auto-refreshes the web view once the server is ready.
+        """
         data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
         if data:
             self.output_display.appendPlainText(data)
+            self._check_and_refresh()
 
     def _on_stderr(self) -> None:
-        """Append stderr from the child process to the output display."""
+        """Append stderr from the child process to the output display.
+
+        Also watches for the server URL pattern (http://HOST:PORT) in the
+        output and auto-refreshes the web view once the server is ready.
+        """
         data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
         if data:
             self.output_display.appendPlainText(data)
+            self._check_and_refresh()
+
+    def _check_and_refresh(self) -> None:
+        """Check output for server URL and refresh web view once ready.
+
+        Scans the full text of the output display for an HTTP URL pattern.
+        When found (and not already refreshed), schedules a one-shot timer
+        to reload the web view so the Qt event loop is not blocked.
+        """
+        if self._auto_refresh_done:
+            return
+
+        text = self.output_display.toPlainText()
+        match = re.search(r"http://[\w.-]+:\d+", text)
+        if match:
+            self._auto_refresh_done = True
+            QTimer.singleShot(0, self._refresh_web_view)
+
+    def _refresh_web_view(self) -> None:
+        """Reload the server web view to fetch the freshly started server."""
+        url = QUrl(self._server_url)
+        self.server_web_view.setUrl(url)
+        self.output_display.appendPlainText(f"\n[Server ready — refreshed web view at {self._server_url}]")
 
     def _on_error(self, error: QProcess.ProcessError) -> None:
         """Called when the process encounters an error (e.g. not found)."""
