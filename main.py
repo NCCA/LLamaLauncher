@@ -1,10 +1,12 @@
 #!/usr/bin/env -S uv run --script
 """Llama model launcher application."""
 
+import argparse
 import sys
 from pathlib import Path
 
 from PySide6.QtCore import QProcess, QTimer
+from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -21,19 +23,27 @@ class LlamaLaunchApp(QMainWindow):
     signals and slots to preserve existing behaviour.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, host: str = "127.0.0.1", port: int = 8080) -> None:
         super().__init__()
         self._process = QProcess(self)
         self._process.readyReadStandardOutput.connect(self._on_stdout)
         self._process.readyReadStandardError.connect(self._on_stderr)
         self._process.finished.connect(self._on_finished)
         self._process.errorOccurred.connect(self._on_error)
+        self._host = host
+        self._port = port
         self._setup_ui()
         self._connect_signals()
+        self._init_web_view()
 
     # ------------------------------------------------------------------
-    # UI loading
+    # UI loading and initialization
     # ------------------------------------------------------------------
+
+    def _init_web_view(self) -> None:
+        """Initialize the QWebEngineView in the Server tab."""
+        url = f"http://{self._host}:{self._port}"
+        self.server_web_view.setUrl(url)
 
     def _setup_ui(self) -> None:
         """Load the main window UI from the .ui file.
@@ -167,10 +177,19 @@ class LlamaLaunchApp(QMainWindow):
             api_key,
         ]
 
+        host = self.host_line_edit.text() or self._host
+        port_str = self.port_line_edit.text() or str(self._port)
+        try:
+            port = int(port_str)
+        except ValueError:
+            port = self._port
+
         if mmproj_path:
             cmd.extend(["--mmproj", mmproj_path])
             if no_mmproj_offload:
                 cmd.append("--no-mmproj-offload")
+
+        cmd.extend(["--host", host, "--port", str(port)])
 
         self.output_display.clear()
         self.output_display.appendPlainText(f"Launching: {' '.join(cmd)}\n---\n")
@@ -178,6 +197,10 @@ class LlamaLaunchApp(QMainWindow):
         # Use two-argument form: program + arguments list (args must NOT include the program)
         self._process.start(cmd[0], cmd[1:])
         self.launch_button.setText("STOP")
+
+        # Update web view to point to the server
+        server_url = f"http://{host}:{port}"
+        self.server_web_view.setUrl(server_url)
 
     # ------------------------------------------------------------------
     # QProcess output slots
@@ -211,8 +234,13 @@ class LlamaLaunchApp(QMainWindow):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Llama model launcher application.")
+    parser.add_argument("--host", default="127.0.0.1", help="Host address for the server (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=8080, help="Port for the server (default: 8080)")
+    args = parser.parse_args()
+
     app = QApplication(sys.argv)
-    window = LlamaLaunchApp()
+    window = LlamaLaunchApp(host=args.host, port=args.port)
     window.resize(800, 600)
     window.show()
     sys.exit(app.exec())
