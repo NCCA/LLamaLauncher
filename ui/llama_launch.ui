@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,6 +52,20 @@
                <string>Select Model...</string>
               </property>
              </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="context_layout">
+            <item>
+             <widget class="QLabel" name="context_size_label">
+              <property name="text">
+               <string>Model Context Size</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="model_context_size"/>
             </item>
            </layout>
           </item>
@@ -154,54 +168,56 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="tempGroup">
-         <property name="title">
-          <string>TEMP</string>
-         </property>
-         <layout class="QVBoxLayout" name="temp_group_layout">
-          <item>
-           <layout class="QFormLayout" name="temp_form_layout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="temp_label">
-              <property name="text">
-               <string>Temp:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QDoubleSpinBox" name="temperature_spinbox">
-              <property name="value">
-               <double>0.300000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="top_p_label">
-              <property name="text">
-               <string>Top P:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QDoubleSpinBox" name="top_p_spinbox">
-              <property name="value">
-               <double>0.900000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="top_k_label">
-              <property name="text">
-               <string>Top K:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QSpinBox" name="top_k_spinbox"/>
-            </item>
-           </layout>
-          </item>
-         </layout>
+        <widget class="QTabWidget" name="tempGroup">
+         <widget class="QWidget" name="tempGroupPage1_2">
+          <attribute name="title">
+           <string/>
+          </attribute>
+          <layout class="QVBoxLayout" name="temp_group_layout">
+           <item>
+            <layout class="QFormLayout" name="temp_form_layout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="temp_label">
+               <property name="text">
+                <string>Temp:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="temperature_spinbox">
+               <property name="value">
+                <double>0.300000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="top_p_label">
+               <property name="text">
+                <string>Top P:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="top_p_spinbox">
+               <property name="value">
+                <double>0.900000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="top_k_label">
+               <property name="text">
+                <string>Top K:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="top_k_spinbox"/>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
        <item>
