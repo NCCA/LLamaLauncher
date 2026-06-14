@@ -6,9 +6,9 @@ import re
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QCoreApplication, QProcess, QTimer, QUrl
+from PySide6.QtCore import QCoreApplication, QProcess, Qt, QTimer, QUrl
 from PySide6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile
-from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: F401
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -25,7 +25,12 @@ class LlamaLaunchApp(QMainWindow):
     signals and slots to preserve existing behaviour.
     """
 
-    def __init__(self, host: str = "127.0.0.1", port: int = 8080) -> None:
+    def __init__(
+        self,
+        host: str = "127.0.0.1",
+        port: int = 8080,
+        ctx_size: int | None = None,
+    ) -> None:
         super().__init__()
         self._process = QProcess(self)
         self._process.readyReadStandardOutput.connect(self._on_stdout)
@@ -38,6 +43,7 @@ class LlamaLaunchApp(QMainWindow):
         self._auto_refresh_done: bool = False
         self._cache_dir: Path = self._create_cache_dir()
         self._profile: QWebEngineProfile = self._create_persistent_profile()
+        self._ctx_size: int | None = ctx_size
         self._setup_ui()
         self._connect_signals()
         self._init_web_view()
@@ -102,6 +108,42 @@ class LlamaLaunchApp(QMainWindow):
         """
         ui_path = Path(__file__).resolve().parent / "ui" / "llama_launch.ui"
         load_ui(ui_path, self)
+        self._setup_context_size_combo()
+
+    def _setup_context_size_combo(self) -> None:
+        """Populate the model context size combobox with options and tooltips.
+
+        Each item stores its numeric value (used as ``--ctx-size``) in the
+        user data role so the launch method can retrieve it later.
+        """
+        self.model_context_size.clear()
+
+        context_options = [
+            ("Auto (model default)", 0, "Recommended default; uses GGUF model context"),
+            ("2K", 2048, "Very small models / low memory"),
+            ("4K", 4096, "Basic chat, small coding tasks"),
+            ("8K", 8192, "General purpose"),
+            ("16K", 16384, "Better coding/chat history"),
+            ("32K", 32768, "Large files, coding assistants"),
+            ("64K", 65536, "Long documents, repo context"),
+            ("128K", 131072, "Modern long-context models"),
+        ]
+
+        for display_name, value, tooltip in context_options:
+            self.model_context_size.addItem(display_name, value)
+            index = self.model_context_size.count() - 1
+            self.model_context_size.setItemData(index, tooltip, Qt.ToolTipRole)
+
+        # Pre-select from CLI if provided, otherwise default to 16K
+        if self._ctx_size is not None:
+            target = self._ctx_size
+        else:
+            target = 16384  # 16K default
+
+        for i in range(self.model_context_size.count()):
+            if int(self.model_context_size.itemData(i, Qt.UserRole)) == target:
+                self.model_context_size.setCurrentIndex(i)
+                break
 
     # ------------------------------------------------------------------
     # Signal connections
@@ -237,6 +279,14 @@ class LlamaLaunchApp(QMainWindow):
             if no_mmproj_offload:
                 cmd.append("--no-mmproj-offload")
 
+        # Context size: only pass --ctx-size when a specific value is selected
+        ctx_size = self.model_context_size.itemData(
+            self.model_context_size.currentIndex(),
+            Qt.UserRole,
+        )
+        if ctx_size is not None and int(ctx_size) > 0:
+            cmd.extend(["--ctx-size", str(ctx_size)])
+
         cmd.extend(["--host", host, "--port", str(port)])
 
         self._server_url = f"http://{host}:{port}"
@@ -324,10 +374,17 @@ if __name__ == "__main__":
         help="Host address for the server (default: 127.0.0.1)",
     )
     parser.add_argument("--port", type=int, default=8080, help="Port for the server (default: 8080)")
+    parser.add_argument(
+        "-c",
+        "--ctx-size",
+        type=int,
+        default=None,
+        help="Model context size in tokens (e.g. 4096, 8192, 32768). Overrides the UI combo box.",
+    )
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
-    window = LlamaLaunchApp(host=args.host, port=args.port)
+    window = LlamaLaunchApp(host=args.host, port=args.port, ctx_size=args.ctx_size)
     window.resize(800, 600)
     window.show()
     sys.exit(app.exec())
