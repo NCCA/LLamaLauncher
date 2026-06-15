@@ -58,9 +58,7 @@ class LlamaLaunchApp(QMainWindow):
         Returns:
             Path to the cache directory (created if it does not exist).
         """
-        cache_dir = (
-            Path(QCoreApplication.applicationDirPath()) / ".cache" / "llama-launcher"
-        )
+        cache_dir = Path(QCoreApplication.applicationDirPath()) / ".cache" / "llama-launcher"
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir
 
@@ -80,9 +78,7 @@ class LlamaLaunchApp(QMainWindow):
         profile.setPersistentStoragePath(str(self._cache_dir))
 
         # Persist cookies to disk (not session-only)
-        profile.setPersistentCookiesPolicy(
-            QWebEngineProfile.PersistentCookiesPolicy.AllowPersistentCookies
-        )
+        profile.setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.AllowPersistentCookies)
 
         # Enable disk HTTP cache for faster page loads
         cache_subdir = self._cache_dir / "cache"
@@ -264,9 +260,7 @@ class LlamaLaunchApp(QMainWindow):
     def _force_kill_if_needed(self) -> None:
         """Force kill the process if graceful termination did not work."""
         if self._process.state() == QProcess.Running:
-            self.output_display.appendPlainText(
-                "Server didn't stop gracefully. Force killing..."
-            )
+            self.output_display.appendPlainText("Server didn't stop gracefully. Force killing...")
             self._process.kill()
 
     def _reset_launch_button(self) -> None:
@@ -308,13 +302,11 @@ class LlamaLaunchApp(QMainWindow):
         ubatch_size = self.ubatch_size_spinbox.value()
         n_predict = self.n_predict_spinbox.value()
         parallel = self.parallel_spinbox.value()
-        defrag_thold = self.defrag_thold_spinbox.value()
         cache_type_k = self.cache_type_k_combobox.currentText()
         cache_type_v = self.cache_type_v_combobox.currentText()
 
         # Advanced Generation parameters
-        draft_max = self.draft_max_spinbox.value()
-        draft_min = self.draft_min_spinbox.value()
+        spec_draft_n_max = self.spec_draft_n_max_spinbox.value()
         seed = self.seed_spinbox.value()
         rope_scaling = self.rope_scaling_combobox.currentText()
         rope_freq_base = self.rope_freq_base_spinbox.value()
@@ -322,9 +314,7 @@ class LlamaLaunchApp(QMainWindow):
 
         mmproj_path = self.mmproj_path_edit.property("fullPath")
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
-        api_key = (
-            self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
-        )
+        api_key = self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
 
         # Build command: llama-server --model ... (conditional sampling params) ...
         cmd = [
@@ -373,8 +363,9 @@ class LlamaLaunchApp(QMainWindow):
             cmd.extend(["--ubatch-size", str(ubatch_size)])
         if self.enable_n_predict_checkbox.isChecked():
             cmd.extend(["--n-predict", str(n_predict)])
-        if self.enable_flash_attn_checkbox.isChecked():
-            cmd.append("--flash-attn")
+        # Flash Attention: always pass the selected value (default auto)
+        flash_attn = self.flash_attn_combobox.currentText()
+        cmd.extend(["--flash-attn", flash_attn])
         if self.enable_cache_type_k_checkbox.isChecked():
             cmd.extend(["--cache-type-k", cache_type_k])
         if self.enable_cache_type_v_checkbox.isChecked():
@@ -387,17 +378,13 @@ class LlamaLaunchApp(QMainWindow):
             cmd.append("--cont-batching")
         if self.enable_parallel_checkbox.isChecked():
             cmd.extend(["--parallel", str(parallel)])
-        if self.enable_defrag_thold_checkbox.isChecked():
-            cmd.extend(["--defrag-thold", str(defrag_thold)])
 
         # Advanced Generation parameters
         draft_model_path = self.draft_model_line_edit.property("fullPath")
         if self.enable_draft_model_checkbox.isChecked() and draft_model_path:
             cmd.extend(["--draft-model", draft_model_path])
-        if self.enable_draft_max_checkbox.isChecked():
-            cmd.extend(["--draft-max", str(draft_max)])
-        if self.enable_draft_min_checkbox.isChecked():
-            cmd.extend(["--draft-min", str(draft_min)])
+        if self.enable_spec_draft_n_max_checkbox.isChecked():
+            cmd.extend(["--spec-draft-n-max", str(spec_draft_n_max)])
         if self.enable_seed_checkbox.isChecked():
             cmd.extend(["--seed", str(seed)])
         grammar_text = self.grammar_line_edit.text().strip()
@@ -459,11 +446,7 @@ class LlamaLaunchApp(QMainWindow):
         Also watches for the server URL pattern (http://HOST:PORT) in the
         output and auto-refreshes the web view once the server is ready.
         """
-        data = (
-            self._process.readAllStandardOutput()
-            .data()
-            .decode("utf-8", errors="replace")
-        )
+        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
         if data:
             self.output_display.appendPlainText(data)
             self._check_and_refresh()
@@ -474,11 +457,7 @@ class LlamaLaunchApp(QMainWindow):
         Also watches for the server URL pattern (http://HOST:PORT) in the
         output and auto-refreshes the web view once the server is ready.
         """
-        data = (
-            self._process.readAllStandardError()
-            .data()
-            .decode("utf-8", errors="replace")
-        )
+        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
         if data:
             self.output_display.appendPlainText(data)
             self._check_and_refresh()
@@ -503,9 +482,7 @@ class LlamaLaunchApp(QMainWindow):
         """Reload the server web view to fetch the freshly started server."""
         url = QUrl(self._server_url)
         self.server_web_view.setUrl(url)
-        self.output_display.appendPlainText(
-            f"\n[Server ready — refreshed web view at {self._server_url}]"
-        )
+        self.output_display.appendPlainText(f"\n[Server ready — refreshed web view at {self._server_url}]")
 
     def _on_error(self, error: QProcess.ProcessError) -> None:
         """Called when the process encounters an error (e.g. not found)."""
@@ -516,13 +493,9 @@ class LlamaLaunchApp(QMainWindow):
     def _on_finished(self, code: int, status: QProcess.ExitStatus) -> None:
         """Called when the child process exits."""
         if status == QProcess.ExitStatus.NormalExit:
-            self.output_display.appendPlainText(
-                f"\n--- Process exited with code {code} ---"
-            )
+            self.output_display.appendPlainText(f"\n--- Process exited with code {code} ---")
         else:
-            self.output_display.appendPlainText(
-                f"\n--- Process terminated abnormally (code {code}) ---"
-            )
+            self.output_display.appendPlainText(f"\n--- Process terminated abnormally (code {code}) ---")
         self._reset_launch_button()
 
 
@@ -533,9 +506,7 @@ if __name__ == "__main__":
         default="127.0.0.1",
         help="Host address for the server (default: 127.0.0.1)",
     )
-    parser.add_argument(
-        "--port", type=int, default=8080, help="Port for the server (default: 8080)"
-    )
+    parser.add_argument("--port", type=int, default=8080, help="Port for the server (default: 8080)")
     parser.add_argument(
         "-c",
         "--ctx-size",
