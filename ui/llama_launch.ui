@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>662</height>
+    <height>713</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -168,56 +168,70 @@
         </widget>
        </item>
        <item>
-        <widget class="QTabWidget" name="tempGroup">
+        <widget class="QTabWidget" name="parameter_tab">
          <widget class="QWidget" name="tempGroupPage1_2">
           <attribute name="title">
            <string>Sampling Parameters</string>
           </attribute>
-          <layout class="QGridLayout" name="temp_group_layout">
-           <property name="horizontalSpacing">
-            <number>12</number>
-           </property>
-           <property name="verticalSpacing">
-            <number>8</number>
-           </property>
-           <!-- Row 0: Temperature | Top P | Top K -->
+          <layout class="QVBoxLayout" name="sampling_page_layout">
+           <item>
+            <widget class="QScrollArea" name="sampling_scroll_area">
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="sampling_scroll_content">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>700</width>
+                <height>400</height>
+               </rect>
+              </property>
+              <layout class="QGridLayout" name="temp_group_layout">
+               <property name="horizontalSpacing">
+                <number>12</number>
+               </property>
+               <property name="verticalSpacing">
+                <number>8</number>
+               </property>
            <item row="0" column="0">
             <layout class="QHBoxLayout" name="temperature_layout">
              <item>
               <widget class="QCheckBox" name="enable_temperature_checkbox">
+               <property name="toolTip">
+                <string
+                                                                                >Controls randomness. Lower values are more deterministic, higher values are more creative.
+Typical range: 0.1-0.4</string>
+               </property>
                <property name="text">
                 <string>Temperature</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
-               <property name="toolTip">
-                <string
-                                                                >Controls randomness. Lower values are more deterministic, higher values are more creative.
-Typical range: 0.1-0.4</string>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="temperature_spinbox">
+               <property name="toolTip">
+                <string>Temperature value for token selection randomness.
+Lower = more focused, Higher = more creative</string>
+               </property>
                <property name="decimals">
                 <number>2</number>
                </property>
                <property name="minimum">
-                <double>0.0</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>5.0</double>
+                <double>5.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.05</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>0.300000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string>Temperature value for token selection randomness.
-Lower = more focused, Higher = more creative</string>
                </property>
               </widget>
              </item>
@@ -227,39 +241,39 @@ Lower = more focused, Higher = more creative</string>
             <layout class="QHBoxLayout" name="top_p_layout">
              <item>
               <widget class="QCheckBox" name="enable_top_p_checkbox">
+               <property name="toolTip">
+                <string
+                                                                                >Nucleus sampling: considers tokens with cumulative probability P.
+Typical range: 0.8-0.95</string>
+               </property>
                <property name="text">
                 <string>Top P</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
-               <property name="toolTip">
-                <string
-                                                                >Nucleus sampling: considers tokens with cumulative probability P.
-Typical range: 0.8-0.95</string>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="top_p_spinbox">
+               <property name="toolTip">
+                <string>Top P cutoff for nucleus sampling.
+0.9 = consider top 90% cumulative probability</string>
+               </property>
                <property name="decimals">
                 <number>2</number>
                </property>
                <property name="minimum">
-                <double>0.0</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>1.0</double>
+                <double>1.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.05</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>0.900000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string>Top P cutoff for nucleus sampling.
-0.9 = consider top 90% cumulative probability</string>
                </property>
               </widget>
              </item>
@@ -269,20 +283,24 @@ Typical range: 0.8-0.95</string>
             <layout class="QHBoxLayout" name="top_k_layout">
              <item>
               <widget class="QCheckBox" name="enable_top_k_checkbox">
+               <property name="toolTip">
+                <string>Restricts sampling to the K most likely tokens.
+Typical range: 20-50</string>
+               </property>
                <property name="text">
                 <string>Top K</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
-               <property name="toolTip">
-                <string>Restricts sampling to the K most likely tokens.
-Typical range: 20-50</string>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QSpinBox" name="top_k_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >Number of highest probability tokens to consider for sampling.</string>
+               </property>
                <property name="minimum">
                 <number>1</number>
                </property>
@@ -295,49 +313,44 @@ Typical range: 20-50</string>
                <property name="value">
                 <number>40</number>
                </property>
-               <property name="toolTip">
-                <string
-                                                                >Number of highest probability tokens to consider for sampling.</string>
-               </property>
               </widget>
              </item>
             </layout>
            </item>
-           <!-- Row 1: Min P | Typical P | Repeat Penalty -->
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="min_p_layout">
              <item>
               <widget class="QCheckBox" name="enable_min_p_checkbox">
-               <property name="text">
-                <string>Min P</string>
-               </property>
                <property name="toolTip">
                 <string
-                                                                >Minimum probability relative to the highest token probability.
+                                                                                >Minimum probability relative to the highest token probability.
 Typical range: 0.05-0.1</string>
+               </property>
+               <property name="text">
+                <string>Min P</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="min_p_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >Minimum probability cutoff relative to the most likely token.</string>
+               </property>
                <property name="decimals">
                 <number>3</number>
                </property>
                <property name="minimum">
-                <double>0.0</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>1.0</double>
+                <double>1.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.01</double>
+                <double>0.010000000000000</double>
                </property>
                <property name="value">
                 <double>0.050000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string
-                                                                >Minimum probability cutoff relative to the most likely token.</string>
                </property>
               </widget>
              </item>
@@ -347,36 +360,36 @@ Typical range: 0.05-0.1</string>
             <layout class="QHBoxLayout" name="typical_p_layout">
              <item>
               <widget class="QCheckBox" name="enable_typical_p_checkbox">
-               <property name="text">
-                <string>Typical P</string>
-               </property>
                <property name="toolTip">
                 <string
-                                                                >Selects tokens near the &quot;typical&quot; probability distribution.
+                                                                                >Selects tokens near the &quot;typical&quot; probability distribution.
 Typical range: 0.9-1.0</string>
+               </property>
+               <property name="text">
+                <string>Typical P</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="typical_p_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >Typical sampling parameter for balanced randomness.</string>
+               </property>
                <property name="decimals">
                 <number>3</number>
                </property>
                <property name="minimum">
-                <double>0.0</double>
+                <double>0.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>1.0</double>
+                <double>1.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.01</double>
+                <double>0.010000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string
-                                                                >Typical sampling parameter for balanced randomness.</string>
                </property>
               </widget>
              </item>
@@ -386,62 +399,65 @@ Typical range: 0.9-1.0</string>
             <layout class="QHBoxLayout" name="repeat_penalty_layout">
              <item>
               <widget class="QCheckBox" name="enable_repeat_penalty_checkbox">
+               <property name="toolTip">
+                <string>Penalizes repeated tokens to reduce repetition.
+Typical range: 1.05-1.15</string>
+               </property>
                <property name="text">
                 <string>Repeat Penalty</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
-               <property name="toolTip">
-                <string>Penalizes repeated tokens to reduce repetition.
-Typical range: 1.05-1.15</string>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="repeat_penalty_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >Penalty for repeated tokens. Higher = stronger penalty.</string>
+               </property>
                <property name="decimals">
                 <number>2</number>
                </property>
                <property name="minimum">
-                <double>0.5</double>
+                <double>0.500000000000000</double>
                </property>
                <property name="maximum">
-                <double>2.0</double>
+                <double>2.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.05</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>1.100000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string
-                                                                >Penalty for repeated tokens. Higher = stronger penalty.</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
-           <!-- Row 2: Repeat Last N | Presence Penalty | Frequency Penalty -->
            <item row="2" column="0">
             <layout class="QHBoxLayout" name="repeat_last_n_layout">
              <item>
               <widget class="QCheckBox" name="enable_repeat_last_n_checkbox">
+               <property name="toolTip">
+                <string>Number of previous tokens to check for repetition.
+Typical range: 64-256</string>
+               </property>
                <property name="text">
                 <string>Repeat Last N</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
-               <property name="toolTip">
-                <string>Number of previous tokens to check for repetition.
-Typical range: 64-256</string>
-               </property>
               </widget>
              </item>
              <item>
               <widget class="QSpinBox" name="repeat_last_n_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >How many recent tokens to consider when penalizing repetition. 0 = use model default.</string>
+               </property>
                <property name="minimum">
                 <number>0</number>
                </property>
@@ -454,10 +470,6 @@ Typical range: 64-256</string>
                <property name="value">
                 <number>64</number>
                </property>
-               <property name="toolTip">
-                <string
-                                                                >How many recent tokens to consider when penalizing repetition. 0 = use model default.</string>
-               </property>
               </widget>
              </item>
             </layout>
@@ -466,35 +478,35 @@ Typical range: 64-256</string>
             <layout class="QHBoxLayout" name="presence_penalty_layout">
              <item>
               <widget class="QCheckBox" name="enable_presence_penalty_checkbox">
-               <property name="text">
-                <string>Presence Penalty</string>
-               </property>
                <property name="toolTip">
                 <string>Penalizes tokens that have already appeared in the text.
 Typical range: 0-0.5</string>
+               </property>
+               <property name="text">
+                <string>Presence Penalty</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="presence_penalty_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >Positive values penalize new tokens based on whether they appear in the text so far.</string>
+               </property>
                <property name="decimals">
                 <number>2</number>
                </property>
                <property name="minimum">
-                <double>-2.0</double>
+                <double>-2.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>2.0</double>
+                <double>2.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.1</double>
+                <double>0.100000000000000</double>
                </property>
                <property name="value">
                 <double>0.000000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string
-                                                                >Positive values penalize new tokens based on whether they appear in the text so far.</string>
                </property>
               </widget>
              </item>
@@ -504,59 +516,62 @@ Typical range: 0-0.5</string>
             <layout class="QHBoxLayout" name="frequency_penalty_layout">
              <item>
               <widget
-                                                            class="QCheckBox"
-                                                            name="enable_frequency_penalty_checkbox"
-                                                        >
-               <property name="text">
-                <string>Frequency Penalty</string>
-               </property>
+                                                                            class="QCheckBox"
+                                                                            name="enable_frequency_penalty_checkbox"
+                                                                        >
                <property name="toolTip">
                 <string>Penalizes tokens based on their frequency in the text.
 Typical range: 0-0.5</string>
+               </property>
+               <property name="text">
+                <string>Frequency Penalty</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="frequency_penalty_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >Positive values penalize new tokens based on their existing frequency in the text so far.</string>
+               </property>
                <property name="decimals">
                 <number>2</number>
                </property>
                <property name="minimum">
-                <double>-2.0</double>
+                <double>-2.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>2.0</double>
+                <double>2.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.1</double>
+                <double>0.100000000000000</double>
                </property>
                <property name="value">
                 <double>0.000000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string
-                                                                >Positive values penalize new tokens based on their existing frequency in the text so far.</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
-           <!-- Row 3: Mirostat | Mirostat LR | Mirostat Ent -->
            <item row="3" column="0">
             <layout class="QHBoxLayout" name="mirostat_layout">
              <item>
               <widget class="QCheckBox" name="enable_mirostat_checkbox">
-               <property name="text">
-                <string>Mirostat</string>
-               </property>
                <property name="toolTip">
                 <string>Enable adaptive sampling algorithm.
 0 = off, 1 = Mirostat 1.0, 2 = Mirostat 2.0</string>
+               </property>
+               <property name="text">
+                <string>Mirostat</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QSpinBox" name="mirostat_spinbox">
+               <property name="toolTip">
+                <string
+                                                                                >Mirostat mode: 0=off, 1=Mirostat 1.0, 2=Mirostat 2.0</string>
+               </property>
                <property name="minimum">
                 <number>0</number>
                </property>
@@ -569,10 +584,6 @@ Typical range: 0-0.5</string>
                <property name="value">
                 <number>1</number>
                </property>
-               <property name="toolTip">
-                <string
-                                                                >Mirostat mode: 0=off, 1=Mirostat 1.0, 2=Mirostat 2.0</string>
-               </property>
               </widget>
              </item>
             </layout>
@@ -581,34 +592,34 @@ Typical range: 0-0.5</string>
             <layout class="QHBoxLayout" name="mirostat_lr_layout">
              <item>
               <widget class="QCheckBox" name="enable_mirostat_lr_checkbox">
-               <property name="text">
-                <string>Mirostat LR</string>
-               </property>
                <property name="toolTip">
                 <string>Mirostat learning rate (eta).
 Typical value: 0.1</string>
+               </property>
+               <property name="text">
+                <string>Mirostat LR</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="mirostat_lr_spinbox">
+               <property name="toolTip">
+                <string>Learning rate for Mirostat adaptive sampling.</string>
+               </property>
                <property name="decimals">
                 <number>3</number>
                </property>
                <property name="minimum">
-                <double>0.001</double>
+                <double>0.001000000000000</double>
                </property>
                <property name="maximum">
-                <double>1.0</double>
+                <double>1.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.01</double>
+                <double>0.010000000000000</double>
                </property>
                <property name="value">
                 <double>0.100000000000000</double>
-               </property>
-               <property name="toolTip">
-                <string>Learning rate for Mirostat adaptive sampling.</string>
                </property>
               </widget>
              </item>
@@ -618,38 +629,544 @@ Typical value: 0.1</string>
             <layout class="QHBoxLayout" name="mirostat_ent_layout">
              <item>
               <widget class="QCheckBox" name="enable_mirostat_ent_checkbox">
-               <property name="text">
-                <string>Mirostat Ent</string>
-               </property>
                <property name="toolTip">
                 <string>Target entropy for Mirostat.
 Typical range: 5-7</string>
+               </property>
+               <property name="text">
+                <string>Mirostat Ent</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="mirostat_ent_spinbox">
+               <property name="toolTip">
+                <string>Target entropy for Mirostat adaptive sampling.</string>
+               </property>
                <property name="decimals">
                 <number>1</number>
                </property>
                <property name="minimum">
-                <double>1.0</double>
+                <double>1.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>10.0</double>
+                <double>10.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.5</double>
+                <double>0.500000000000000</double>
                </property>
                <property name="value">
                 <double>5.000000000000000</double>
                </property>
-               <property name="toolTip">
-                <string>Target entropy for Mirostat adaptive sampling.</string>
-               </property>
               </widget>
              </item>
             </layout>
+           </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="performancePage">
+          <attribute name="title">
+           <string>Performance</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="performance_page_layout">
+           <item>
+            <widget class="QScrollArea" name="performance_scroll_area">
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="performance_scroll_content">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>700</width>
+                <height>600</height>
+               </rect>
+              </property>
+              <layout class="QVBoxLayout" name="performance_page_layout_inner">
+               <item>
+                <widget class="QGroupBox" name="gpu_layers_group">
+                 <property name="title">
+                  <string>GPU Layer Offload</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="gpu_layers_layout">
+                  <item>
+                   <layout class="QHBoxLayout" name="gpu_layers_hbox">
+                    <item>
+                     <widget
+                                                                                        class="QCheckBox"
+                                                                                        name="enable_gpu_layers_checkbox"
+                                                                                    >
+                  <property name="toolTip">
+                   <string>Number of model layers to offload to GPU.
+99 = full offload if memory allows</string>
+                  </property>
+                  <property name="text">
+                   <string>GPU Layers</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="gpu_layers_spinbox">
+                  <property name="toolTip">
+                   <string>Number of model layers to offload to GPU.
+Higher values use more VRAM but speed up generation.</string>
+                  </property>
+                  <property name="minimum">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <number>999</number>
+                  </property>
+                  <property name="value">
+                   <number>99</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="cpu_threading_group">
+             <property name="title">
+              <string>CPU Threading</string>
+             </property>
+             <layout class="QVBoxLayout" name="cpu_threading_layout">
+              <item>
+               <layout class="QHBoxLayout" name="threads_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_threads_checkbox">
+                  <property name="toolTip">
+                   <string>Number of CPU threads used for generation.
+Set to number of performance cores or leave at 0 for auto.</string>
+                  </property>
+                  <property name="text">
+                   <string>Threads</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="threads_spinbox">
+                  <property name="toolTip">
+                   <string>Number of CPU threads used for token generation.
+0 = use system default.</string>
+                  </property>
+                  <property name="minimum">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <number>1024</number>
+                  </property>
+                  <property name="value">
+                   <number>0</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="threads_batch_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_threads_batch_checkbox">
+                  <property name="toolTip">
+                   <string>Number of CPU threads used during prompt processing.
+Typically higher than generation threads.</string>
+                  </property>
+                  <property name="text">
+                   <string>Threads Batch</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="threads_batch_spinbox">
+                  <property name="toolTip">
+                   <string>Number of CPU threads used during prompt processing.
+0 = same as threads.</string>
+                  </property>
+                  <property name="minimum">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <number>1024</number>
+                  </property>
+                  <property name="value">
+                   <number>0</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="batching_group">
+             <property name="title">
+              <string>Batching</string>
+             </property>
+             <layout class="QVBoxLayout" name="batching_layout">
+              <item>
+               <layout class="QHBoxLayout" name="batch_size_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_batch_size_checkbox">
+                  <property name="toolTip">
+                   <string>Number of tokens processed per batch.
+Typical range: 512-2048</string>
+                  </property>
+                  <property name="text">
+                   <string>Batch Size</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="batch_size_spinbox">
+                  <property name="toolTip">
+                   <string>Number of tokens processed per batch.
+Higher values improve throughput but use more memory.</string>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>4096</number>
+                  </property>
+                  <property name="value">
+                   <number>512</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="ubatch_size_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_ubatch_size_checkbox">
+                  <property name="toolTip">
+                   <string>Physical micro-batch size.
+Typical range: 128-512</string>
+                  </property>
+                  <property name="text">
+                   <string>Micro-Batch Size</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="ubatch_size_spinbox">
+                  <property name="toolTip">
+                   <string>Physical micro-batch size for prompt processing.
+Smaller values reduce memory spikes.</string>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>1024</number>
+                  </property>
+                  <property name="value">
+                   <number>512</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="n_predict_group">
+             <property name="title">
+              <string>Generation</string>
+             </property>
+             <layout class="QVBoxLayout" name="n_predict_layout">
+              <item>
+               <layout class="QHBoxLayout" name="n_predict_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_n_predict_checkbox">
+                  <property name="toolTip">
+                   <string>Maximum number of tokens to generate per request.
+Typical range: 2048-8192</string>
+                  </property>
+                  <property name="text">
+                   <string>N Predict</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="n_predict_spinbox">
+                  <property name="toolTip">
+                   <string
+                                                                                            >Maximum number of tokens to generate in a single request.
+0 = unlimited (until EOS or context limit).</string>
+                  </property>
+                  <property name="minimum">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <number>65536</number>
+                  </property>
+                  <property name="value">
+                   <number>2048</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="flash_attn_group">
+             <property name="title">
+              <string>Attention Optimizations</string>
+             </property>
+             <layout class="QVBoxLayout" name="flash_attn_layout">
+              <item>
+               <widget class="QCheckBox" name="enable_flash_attn_checkbox">
+                <property name="toolTip">
+                 <string
+                                                                                    >Enable Flash Attention to reduce memory use and improve speed.
+Requires compatible GPU.</string>
+                </property>
+                <property name="text">
+                 <string>Flash Attention</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="kv_cache_group">
+             <property name="title">
+              <string>KV Cache</string>
+             </property>
+             <layout class="QVBoxLayout" name="kv_cache_layout">
+              <item>
+               <layout class="QHBoxLayout" name="cache_type_k_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_cache_type_k_checkbox">
+                  <property name="toolTip">
+                   <string>KV cache key precision.
+f16 = highest quality, q8_0/q4_0 = lower memory use.</string>
+                  </property>
+                  <property name="text">
+                   <string>Cache Type K</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="cache_type_k_combobox">
+                  <property name="toolTip">
+                   <string>KV cache key data type precision.
+f16 = full precision, q8_0/q4_0 = quantized.</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>f16</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>q8_0</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>q4_0</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="cache_type_v_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_cache_type_v_checkbox">
+                  <property name="toolTip">
+                   <string>KV cache value precision.
+f16 = highest quality, q8_0/q4_0 = lower memory use.</string>
+                  </property>
+                  <property name="text">
+                   <string>Cache Type V</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="cache_type_v_combobox">
+                  <property name="toolTip">
+                   <string>KV cache value data type precision.
+f16 = full precision, q8_0/q4_0 = quantized.</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>f16</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>q8_0</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>q4_0</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="memory_group">
+             <property name="title">
+              <string>Memory Handling</string>
+             </property>
+             <layout class="QVBoxLayout" name="memory_layout">
+              <item>
+               <widget class="QCheckBox" name="enable_mmap_checkbox">
+                <property name="toolTip">
+                 <string>Memory-map the model file for efficient loading.
+Recommended to keep enabled.</string>
+                </property>
+                <property name="text">
+                 <string>MMap</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="enable_mlock_checkbox">
+                <property name="toolTip">
+                 <string>Lock model into RAM to prevent swapping.
+Enable only if you have enough system RAM.</string>
+                </property>
+                <property name="text">
+                 <string>MLock</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="server_batching_group">
+             <property name="title">
+              <string>Server Batching</string>
+             </property>
+             <layout class="QVBoxLayout" name="server_batching_layout">
+              <item>
+               <widget class="QCheckBox" name="enable_cont_batching_checkbox">
+                <property name="toolTip">
+                 <string
+                                                                                    >Enable continuous batching for handling multiple requests.
+Improves throughput for concurrent users.</string>
+                </property>
+                <property name="text">
+                 <string>Continuous Batching</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="parallel_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_parallel_checkbox">
+                  <property name="toolTip">
+                   <string>Number of concurrent sequences the server can handle.
+Typical range: 1-8+</string>
+                  </property>
+                  <property name="text">
+                   <string>Parallel Sequences</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="parallel_spinbox">
+                  <property name="toolTip">
+                   <string>Number of concurrent sequences to process.
+Higher values support more users but use more memory.</string>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>32</number>
+                  </property>
+                  <property name="value">
+                   <number>4</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="defrag_thold_hbox">
+                <item>
+                 <widget class="QCheckBox" name="enable_defrag_thold_checkbox">
+                  <property name="toolTip">
+                   <string>KV cache defragmentation threshold.
+0.1-0.5 = trigger defrag when fragmentation exceeds this value.</string>
+                  </property>
+                  <property name="text">
+                   <string>Defrag Threshold</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="defrag_thold_spinbox">
+                  <property name="toolTip">
+                   <string>Threshold for KV cache defragmentation.
+0 = disabled, 1.0 = always enabled.</string>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="minimum">
+                   <double>0.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>1.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.500000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+               <item>
+                <spacer name="performance_vertical_spacer">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </widget>
            </item>
           </layout>
          </widget>

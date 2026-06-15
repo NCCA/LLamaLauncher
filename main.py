@@ -258,6 +258,18 @@ class LlamaLaunchApp(QMainWindow):
         mirostat_lr = self.mirostat_lr_spinbox.value()
         mirostat_ent = self.mirostat_ent_spinbox.value()
 
+        # Performance parameters
+        gpu_layers = self.gpu_layers_spinbox.value()
+        threads = self.threads_spinbox.value()
+        threads_batch = self.threads_batch_spinbox.value()
+        batch_size = self.batch_size_spinbox.value()
+        ubatch_size = self.ubatch_size_spinbox.value()
+        n_predict = self.n_predict_spinbox.value()
+        parallel = self.parallel_spinbox.value()
+        defrag_thold = self.defrag_thold_spinbox.value()
+        cache_type_k = self.cache_type_k_combobox.currentText()
+        cache_type_v = self.cache_type_v_combobox.currentText()
+
         mmproj_path = self.mmproj_path_edit.property("fullPath")
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
         api_key = self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
@@ -295,6 +307,36 @@ class LlamaLaunchApp(QMainWindow):
             cmd.extend(["--mirostat-lr", str(mirostat_lr)])
         if self.enable_mirostat_ent_checkbox.isChecked():
             cmd.extend(["--mirostat-ent", str(mirostat_ent)])
+
+        # Performance parameters
+        if self.enable_gpu_layers_checkbox.isChecked():
+            cmd.extend(["--n-gpu-layers", str(gpu_layers)])
+        if self.enable_threads_checkbox.isChecked():
+            cmd.extend(["--threads", str(threads)])
+        if self.enable_threads_batch_checkbox.isChecked():
+            cmd.extend(["--threads-batch", str(threads_batch)])
+        if self.enable_batch_size_checkbox.isChecked():
+            cmd.extend(["--batch-size", str(batch_size)])
+        if self.enable_ubatch_size_checkbox.isChecked():
+            cmd.extend(["--ubatch-size", str(ubatch_size)])
+        if self.enable_n_predict_checkbox.isChecked():
+            cmd.extend(["--n-predict", str(n_predict)])
+        if self.enable_flash_attn_checkbox.isChecked():
+            cmd.append("--flash-attn")
+        if self.enable_cache_type_k_checkbox.isChecked():
+            cmd.extend(["--cache-type-k", cache_type_k])
+        if self.enable_cache_type_v_checkbox.isChecked():
+            cmd.extend(["--cache-type-v", cache_type_v])
+        if self.enable_mmap_checkbox.isChecked():
+            cmd.append("--mmap")
+        if self.enable_mlock_checkbox.isChecked():
+            cmd.append("--mlock")
+        if self.enable_cont_batching_checkbox.isChecked():
+            cmd.append("--cont-batching")
+        if self.enable_parallel_checkbox.isChecked():
+            cmd.extend(["--parallel", str(parallel)])
+        if self.enable_defrag_thold_checkbox.isChecked():
+            cmd.extend(["--defrag-thold", str(defrag_thold)])
 
         host = self.host_line_edit.text() or self._host
         port_str = self.port_line_edit.text() or str(self._port)

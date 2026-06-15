@@ -59,6 +59,146 @@
 
 | `--mirostat-ent` | Target entropy for Mirostat | `5–7` |
 
+## Performance
+
+- [ ] Configure GPU acceleration
+
+  - [ ] Set GPU layer offload
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `-ngl` / `--n-gpu-layers` | Number of model layers offloaded to GPU | `99` (full offload if memory allows) |
+
+  - [ ] Configure CPU threading
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `-t` / `--threads` | Number of CPU threads used for generation | Number of performance cores or auto |
+
+    | `--threads-batch` | CPU threads used during prompt processing | Higher than generation threads |
+
+  - [ ] Tune batching
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `-b` / `--batch-size` | Number of tokens processed per batch | `512–2048` |
+
+    | `-ub` / `--ubatch-size` | Physical micro-batch size | `128–512` |
+
+  - [ ] Configure context size
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `-c` / `--ctx-size` | Maximum context window size | `8192–131072` depending on model |
+
+    | `--n-predict` | Maximum tokens generated | `2048–8192` |
+
+  - [ ] Enable attention optimisations
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `--flash-attn` | Enable Flash Attention to reduce memory use and improve speed | `on` |
+
+  - [ ] Optimise KV cache
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `--cache-type-k` | KV cache key precision | `f16`, `q8_0`, `q4_0` |
+
+    | `--cache-type-v` | KV cache value precision | `f16`, `q8_0`, `q4_0` |
+
+  - [ ] Configure memory handling
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `--mmap` | Memory-map model file | Enabled |
+
+    | `--mlock` | Lock model into RAM to prevent swapping | Enable if enough RAM |
+
+  - [ ] Configure server batching
+
+    | Parameter | Purpose | Typical Value |
+
+    |---|---|---|
+
+    | `--cont-batching` | Enable continuous batching for multiple requests | `on` |
+
+    | `--parallel` | Number of concurrent sequences | `1–8+` |
+
+    | `--defrag-thold` | KV cache defragmentation threshold | `0.1–0.5` |
+
+---
+
+# Advanced Generation
+
+- [ ] Configure speculative decoding / MTP support
+
+  | Parameter | Purpose | Typical Value |
+
+  |---|---|---|
+
+  | `--draft-model` | Small draft model used for speculative decoding | Smaller compatible model |
+
+  | `--draft-max` | Maximum number of draft tokens | `4–8` |
+
+  | `--draft-min` | Minimum number of draft tokens | `1–2` |
+
+- [ ] Configure adaptive sampling
+
+  | Parameter | Purpose | Typical Value |
+
+  |---|---|---|
+
+  | `--mirostat` | Adaptive sampling algorithm | `0` (off), `1` or `2` (enabled) |
+
+  | `--mirostat-lr` | Mirostat learning rate | `0.1` |
+
+  | `--mirostat-ent` | Target entropy level | `5–7` |
+
+- [ ] Configure deterministic generation
+
+  | Parameter | Purpose | Typical Value |
+
+  |---|---|---|
+
+  | `--seed` | Random seed for reproducible output | Fixed integer (e.g. `42`) |
+
+- [ ] Configure structured output constraints
+
+  | Parameter | Purpose | Typical Value |
+
+  |---|---|---|
+
+  | `--grammar` | Apply grammar constraints to generation | JSON / custom grammar file |
+
+  | `--json-schema` | Force JSON schema compliant output | Schema file |
+
+- [ ] Configure model behaviour
+
+  | Parameter | Purpose | Typical Value |
+
+  |---|---|---|
+
+  | `--rope-scaling` | Extend model context length using RoPE scaling | Model dependent |
+
+  | `--rope-freq-base` | Modify RoPE frequency base | Model dependent |
+
+  | `--rope-freq-scale` | Adjust positional scaling | Model dependent |
+
 ## Phase 3 : Testing
 
 [ ] Not test we need to add them with pytest
