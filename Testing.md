@@ -33,12 +33,12 @@ uv add --dev pytest-qt pytest-cov
 
 ### 1.1 Project Setup
 
-- [ ] Create `tests/` directory with `__init__.py`
-- [ ] Create `tests/conftest.py` with shared fixtures:
+- [ x] Create `tests/` directory with `__init__.py`
+- [ x] Create `tests/conftest.py` with shared fixtures:
   - `qapp`: QApplication singleton (pytest-qt)
   - `temp_dir`: Temporary directory for test files
   - `mock_qprocess`: Patched QProcess for process tests
-- [ ] Configure `pyproject.toml` for pytest and coverage:
+- [ x] Configure `pyproject.toml` for pytest and coverage:
   ```toml
   [tool.pytest.ini_options]
   testpaths = ["tests"]
@@ -58,7 +58,7 @@ uv add --dev pytest-qt pytest-cov
   ]
   fail_under = 90
   ```
-- [ ] Create `tests/files/` directory for test fixtures (sample JSON configs, etc.)
+- [ x] Create `tests/files/` directory for test fixtures (sample JSON configs, etc.)
 
 ### 1.2 Test `ui_loader.py` (Priority: Highest)
 
