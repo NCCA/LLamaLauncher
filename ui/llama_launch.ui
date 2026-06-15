@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <ui version="4.0">
  <class>LlamaLaunchApp</class>
  <widget class="QWidget" name="LlamaLaunchApp">
@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>620</height>
+    <height>662</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,7 +65,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="model_context_size"/>
+             <widget class="QComboBox" name="model_context_size" />
             </item>
            </layout>
           </item>
@@ -171,48 +171,65 @@
         <widget class="QTabWidget" name="tempGroup">
          <widget class="QWidget" name="tempGroupPage1_2">
           <attribute name="title">
-           <string/>
+           <string>Sampling Parameters</string>
           </attribute>
           <layout class="QVBoxLayout" name="temp_group_layout">
            <item>
-            <layout class="QFormLayout" name="temp_form_layout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="temp_label">
+            <layout class="QHBoxLayout" name="temperature_layout">
+             <item>
+              <widget class="QCheckBox" name="enable_temperature_checkbox">
                <property name="text">
-                <string>Temp:</string>
+                <string>Temperature</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
+             <item>
               <widget class="QDoubleSpinBox" name="temperature_spinbox">
                <property name="value">
                 <double>0.300000000000000</double>
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="top_p_label">
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="top_p_layout">
+             <item>
+              <widget class="QCheckBox" name="enable_top_p_checkbox">
                <property name="text">
-                <string>Top P:</string>
+                <string>Top P</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item>
               <widget class="QDoubleSpinBox" name="top_p_spinbox">
                <property name="value">
                 <double>0.900000000000000</double>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="top_k_label">
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="top_k_layout">
+             <item>
+              <widget class="QCheckBox" name="enable_top_k_checkbox">
                <property name="text">
-                <string>Top K:</string>
+                <string>Top K</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QSpinBox" name="top_k_spinbox"/>
+             <item>
+              <widget class="QSpinBox" name="top_k_spinbox" />
              </item>
             </layout>
            </item>
@@ -274,7 +291,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="server_tab_layout">
        <item>
-        <widget class="QWebEngineView" name="server_web_view" native="true"/>
+        <widget class="QWebEngineView" name="server_web_view" native="true" />
        </item>
       </layout>
      </widget>
@@ -289,6 +306,6 @@
    <header>qwebengineview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
- <connections/>
+ <resources />
+ <connections />
 </ui>

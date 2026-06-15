@@ -252,20 +252,21 @@ class LlamaLaunchApp(QMainWindow):
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
         api_key = self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
 
-        # Build command: llama-server --model ... --temp ... ...
+        # Build command: llama-server --model ... (conditional sampling params) ...
         cmd = [
             "llama-server",
             "--model",
             model_path,
-            "--temp",
-            str(temperature),
-            "--top-p",
-            str(top_p),
-            "--top-k",
-            str(top_k),
             "--api-key",
             api_key,
         ]
+
+        if self.enable_temperature_checkbox.isChecked():
+            cmd.extend(["--temp", str(temperature)])
+        if self.enable_top_p_checkbox.isChecked():
+            cmd.extend(["--top-p", str(top_p)])
+        if self.enable_top_k_checkbox.isChecked():
+            cmd.extend(["--top-k", str(top_k)])
 
         host = self.host_line_edit.text() or self._host
         port_str = self.port_line_edit.text() or str(self._port)
