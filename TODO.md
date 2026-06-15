@@ -9,7 +9,7 @@
 
 ## Phase 2 : Context Parameters
 
-[ ] Need to set the context -c parameter this will be the conversation context size, A tool tip should be added to the context combobox to explain what it does.
+[X ] Need to set the context -c parameter this will be the conversation context size, A tool tip should be added to the context combobox to explain what it does.
 | Display name | Value passed to `--ctx-size` | Use case |
 
 |---|---:|---|
