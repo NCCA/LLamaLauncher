@@ -173,65 +173,117 @@
           <attribute name="title">
            <string>Sampling Parameters</string>
           </attribute>
-          <layout class="QVBoxLayout" name="temp_group_layout">
-           <item>
-            <layout class="QHBoxLayout" name="temperature_layout">
-             <item>
-              <widget class="QCheckBox" name="enable_temperature_checkbox">
-               <property name="text">
-                <string>Temperature</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="temperature_spinbox">
-               <property name="value">
-                <double>0.300000000000000</double>
-               </property>
-              </widget>
-             </item>
-            </layout>
+          <layout class="QGridLayout" name="temp_group_layout">
+           <property name="horizontalSpacing">
+            <number>12</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>8</number>
+           </property>
+           <!-- Row 0: Temperature -->
+           <item row="0" column="0" colspan="2">
+            <widget class="QWidget" name="temperature_widget">
+             <layout class="QFormLayout" name="temperature_form_layout">
+              <property name="formLayoutSpacing">
+               <number>8</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="enable_temperature_checkbox">
+                <property name="text">
+                 <string>Temperature</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="temperature_spinbox">
+                <property name="decimals">
+                 <number>2</number>
+                </property>
+                <property name="minimum">
+                 <double>0.0</double>
+                </property>
+                <property name="maximum">
+                 <double>5.0</double>
+                </property>
+                <property name="value">
+                 <double>0.300000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
-           <item>
-            <layout class="QHBoxLayout" name="top_p_layout">
-             <item>
-              <widget class="QCheckBox" name="enable_top_p_checkbox">
-               <property name="text">
-                <string>Top P</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="top_p_spinbox">
-               <property name="value">
-                <double>0.900000000000000</double>
-               </property>
-              </widget>
-             </item>
-            </layout>
+           <!-- Row 1: Top P -->
+           <item row="1" column="0" colspan="2">
+            <widget class="QWidget" name="top_p_widget">
+             <layout class="QFormLayout" name="top_p_form_layout">
+              <property name="formLayoutSpacing">
+               <number>8</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="enable_top_p_checkbox">
+                <property name="text">
+                 <string>Top P</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QDoubleSpinBox" name="top_p_spinbox">
+                <property name="decimals">
+                 <number>2</number>
+                </property>
+                <property name="minimum">
+                 <double>0.0</double>
+                </property>
+                <property name="maximum">
+                 <double>1.0</double>
+                </property>
+                <property name="value">
+                 <double>0.900000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
-           <item>
-            <layout class="QHBoxLayout" name="top_k_layout">
-             <item>
-              <widget class="QCheckBox" name="enable_top_k_checkbox">
-               <property name="text">
-                <string>Top K</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="top_k_spinbox" />
-             </item>
-            </layout>
+           <!-- Row 2: Top K -->
+           <item row="2" column="0" colspan="2">
+            <widget class="QWidget" name="top_k_widget">
+             <layout class="QFormLayout" name="top_k_form_layout">
+              <property name="formLayoutSpacing">
+               <number>8</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="enable_top_k_checkbox">
+                <property name="text">
+                 <string>Top K</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QSpinBox" name="top_k_spinbox">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>500</number>
+                </property>
+                <property name="value">
+                 <number>40</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
           </layout>
          </widget>
