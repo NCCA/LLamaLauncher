@@ -2,17 +2,21 @@
 """Llama model launcher application."""
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QCoreApplication, QProcess, Qt, QTimer, QUrl
+from PySide6.QtCore import QCoreApplication, QProcess, QSettings, Qt, QTimer, QUrl
+from PySide6.QtGui import QAction
 from PySide6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile
 from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: F401
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QMainWindow,
+    QMenu,
+    QMessageBox,
 )
 
 from ui_loader import load_ui
@@ -45,6 +49,7 @@ class LlamaLaunchApp(QMainWindow):
         self._profile: QWebEngineProfile = self._create_persistent_profile()
         self._ctx_size: int | None = ctx_size
         self._setup_ui()
+        self._load_last_session()
         self._connect_signals()
         self._init_web_view()
 
@@ -109,6 +114,7 @@ class LlamaLaunchApp(QMainWindow):
         ui_path = Path(__file__).resolve().parent / "ui" / "llama_launch.ui"
         load_ui(ui_path, self)
         self._setup_context_size_combo()
+        self._create_file_menu()
 
     def _setup_context_size_combo(self) -> None:
         """Populate the model context size combobox with options and tooltips.
@@ -144,6 +150,376 @@ class LlamaLaunchApp(QMainWindow):
             if int(self.model_context_size.itemData(i, Qt.UserRole)) == target:
                 self.model_context_size.setCurrentIndex(i)
                 break
+
+    # ------------------------------------------------------------------
+    # File menu
+    # ------------------------------------------------------------------
+
+    def _create_file_menu(self) -> None:
+        """Create the File menu with Save, Save As, and Load actions."""
+        file_menu = QMenu("&File", self)
+
+        save_action = QAction("Save Configuration", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.setStatusTip("Save current configuration to file")
+        save_action.triggered.connect(self._save_config)
+        file_menu.addAction(save_action)
+
+        save_as_action = QAction("Save As Configuration...", self)
+        save_as_action.setStatusTip("Save current configuration to a new file")
+        save_as_action.triggered.connect(self._save_config_as)
+        file_menu.addAction(save_as_action)
+
+        load_action = QAction("Load Configuration...", self)
+        load_action.setShortcut("Ctrl+O")
+        load_action.setStatusTip("Load configuration from file")
+        load_action.triggered.connect(self._load_config)
+        file_menu.addAction(load_action)
+
+        self.menuBar().addMenu(file_menu)
+
+    # ------------------------------------------------------------------
+    # Configuration save/load
+    # ------------------------------------------------------------------
+
+    def _save_config(self) -> None:
+        """Save current configuration to the last saved file or prompt for path."""
+        if not hasattr(self, "_last_config_path"):
+            self._save_config_as()
+            return
+        self._write_config_file(self._last_config_path)
+
+    def _save_config_as(self) -> None:
+        """Save current configuration to a user-selected file path."""
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Configuration",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if file_path:
+            self._write_config_file(file_path)
+            self._last_config_path = file_path
+
+    def _write_config_file(self, file_path: str) -> None:
+        """Write the current UI configuration to a JSON file.
+
+        Args:
+            file_path: Path to the JSON file to write.
+        """
+        config = self._collect_config()
+        try:
+            with open(file_path, "w") as f:
+                json.dump(config, f, indent=2)
+            self.output_display.appendPlainText(f"Configuration saved to {file_path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Save Error", f"Failed to save configuration:\n{e}")
+
+    def _collect_config(self) -> dict:
+        """Collect all UI widget values into a configuration dictionary.
+
+        Returns:
+            Dictionary containing all configuration values organized by category.
+        """
+        config: dict = {"version": "1.0"}
+
+        # Files/Paths
+        config["files"] = {
+            "model_path": self.model_path_edit.getProperty("fullPath", ""),
+            "mmproj_path": self.mmproj_path_edit.getProperty("fullPath", ""),
+            "draft_model_path": self.draft_model_line_edit.getProperty("fullPath", ""),
+            "json_schema_path": self.json_schema_line_edit.getProperty("fullPath", ""),
+        }
+
+        # Server
+        config["server"] = {
+            "host": self.host_line_edit.text(),
+            "port": int(self.port_line_edit.text()) if self.port_line_edit.text().isdigit() else 8080,
+            "api_key": self.api_key_line_edit.text(),
+        }
+
+        # Sampling parameters
+        config["sampling"] = {
+            "temperature": {"enabled": self.enable_temperature_checkbox.isChecked(), "value": self.temperature_spinbox.value()},
+            "top_p": {"enabled": self.enable_top_p_checkbox.isChecked(), "value": self.top_p_spinbox.value()},
+            "top_k": {"enabled": self.enable_top_k_checkbox.isChecked(), "value": self.top_k_spinbox.value()},
+            "min_p": {"enabled": self.enable_min_p_checkbox.isChecked(), "value": self.min_p_spinbox.value()},
+            "typical_p": {"enabled": self.enable_typical_p_checkbox.isChecked(), "value": self.typical_p_spinbox.value()},
+            "repeat_penalty": {"enabled": self.enable_repeat_penalty_checkbox.isChecked(), "value": self.repeat_penalty_spinbox.value()},
+            "repeat_last_n": {"enabled": self.enable_repeat_last_n_checkbox.isChecked(), "value": self.repeat_last_n_spinbox.value()},
+            "presence_penalty": {"enabled": self.enable_presence_penalty_checkbox.isChecked(), "value": self.presence_penalty_spinbox.value()},
+            "frequency_penalty": {"enabled": self.enable_frequency_penalty_checkbox.isChecked(), "value": self.frequency_penalty_spinbox.value()},
+            "mirostat": {"enabled": self.enable_mirostat_checkbox.isChecked(), "value": self.mirostat_spinbox.value()},
+            "mirostat_lr": {"enabled": self.enable_mirostat_lr_checkbox.isChecked(), "value": self.mirostat_lr_spinbox.value()},
+            "mirostat_ent": {"enabled": self.enable_mirostat_ent_checkbox.isChecked(), "value": self.mirostat_ent_spinbox.value()},
+        }
+
+        # Performance parameters
+        config["performance"] = {
+            "gpu_layers": {"enabled": self.enable_gpu_layers_checkbox.isChecked(), "value": self.gpu_layers_spinbox.value()},
+            "threads": {"enabled": self.enable_threads_checkbox.isChecked(), "value": self.threads_spinbox.value()},
+            "threads_batch": {"enabled": self.enable_threads_batch_checkbox.isChecked(), "value": self.threads_batch_spinbox.value()},
+            "batch_size": {"enabled": self.enable_batch_size_checkbox.isChecked(), "value": self.batch_size_spinbox.value()},
+            "ubatch_size": {"enabled": self.enable_ubatch_size_checkbox.isChecked(), "value": self.ubatch_size_spinbox.value()},
+            "n_predict": {"enabled": self.enable_n_predict_checkbox.isChecked(), "value": self.n_predict_spinbox.value()},
+            "parallel": {"enabled": self.enable_parallel_checkbox.isChecked(), "value": self.parallel_spinbox.value()},
+            "flash_attn": self.flash_attn_combobox.currentText(),
+            "cache_type_k": {"enabled": self.enable_cache_type_k_checkbox.isChecked(), "value": self.cache_type_k_combobox.currentText()},
+            "cache_type_v": {"enabled": self.enable_cache_type_v_checkbox.isChecked(), "value": self.cache_type_v_combobox.currentText()},
+            "mmap": self.enable_mmap_checkbox.isChecked(),
+            "mlock": self.enable_mlock_checkbox.isChecked(),
+            "cont_batching": self.enable_cont_batching_checkbox.isChecked(),
+        }
+
+        # Advanced Generation parameters
+        config["advanced"] = {
+            "draft_model": {"enabled": self.enable_draft_model_checkbox.isChecked(), "path": self.draft_model_line_edit.getProperty("fullPath", "")},
+            "spec_draft_n_max": {"enabled": self.enable_spec_draft_n_max_checkbox.isChecked(), "value": self.spec_draft_n_max_spinbox.value()},
+            "seed": {"enabled": self.enable_seed_checkbox.isChecked(), "value": self.seed_spinbox.value()},
+            "grammar": {"enabled": self.enable_grammar_checkbox.isChecked(), "path": self.grammar_line_edit.getProperty("fullPath", "")},
+            "json_schema": {"enabled": self.enable_json_schema_checkbox.isChecked(), "path": self.json_schema_line_edit.getProperty("fullPath", "")},
+            "rope_scaling": {"enabled": self.enable_rope_scaling_checkbox.isChecked(), "value": self.rope_scaling_combobox.currentText()},
+            "rope_freq_base": {"enabled": self.enable_rope_freq_base_checkbox.isChecked(), "value": self.rope_freq_base_spinbox.value()},
+            "rope_freq_scale": {"enabled": self.enable_rope_freq_scale_checkbox.isChecked(), "value": self.rope_freq_scale_spinbox.value()},
+        }
+
+        # Other settings
+        config["context_size"] = self.model_context_size.itemData(self.model_context_size.currentIndex(), Qt.UserRole)
+        config["more_options"] = self.more_options_line_edit.text()
+        config["no_mmproj_offload"] = self.no_mmproj_offload_checkbox.isChecked()
+
+        return config
+
+    def _load_config(self) -> None:
+        """Load configuration from a user-selected JSON file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Load Configuration",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not file_path:
+            return
+
+        try:
+            with open(file_path, "r") as f:
+                config = json.load(f)
+            self._apply_config(config)
+            self._last_config_path = file_path
+            self.output_display.appendPlainText(f"Configuration loaded from {file_path}")
+        except json.JSONDecodeError as e:
+            QMessageBox.critical(self, "Load Error", f"Invalid JSON format:\n{e}")
+        except Exception as e:
+            QMessageBox.critical(self, "Load Error", f"Failed to load configuration:\n{e}")
+
+    def _apply_config(self, config: dict) -> None:
+        """Apply configuration values from a dictionary to the UI widgets.
+
+        Args:
+            config: Configuration dictionary to apply.
+        """
+        # Files/Paths
+        if "files" in config:
+            files = config["files"]
+            self._set_path_field(self.model_path_edit, files.get("model_path", ""))
+            self._set_path_field(self.mmproj_path_edit, files.get("mmproj_path", ""))
+            self._set_path_field(self.draft_model_line_edit, files.get("draft_model_path", ""))
+            self._set_path_field(self.json_schema_line_edit, files.get("json_schema_path", ""))
+
+        # Server
+        if "server" in config:
+            server = config["server"]
+            self.host_line_edit.setText(server.get("host", "127.0.0.1"))
+            port = server.get("port", 8080)
+            self.port_line_edit.setText(str(port))
+            self.api_key_line_edit.setText(server.get("api_key", "12345"))
+
+        # Sampling parameters
+        if "sampling" in config:
+            sampling = config["sampling"]
+            self._apply_param(sampling, "temperature", self.enable_temperature_checkbox, self.temperature_spinbox)
+            self._apply_param(sampling, "top_p", self.enable_top_p_checkbox, self.top_p_spinbox)
+            self._apply_param(sampling, "top_k", self.enable_top_k_checkbox, self.top_k_spinbox)
+            self._apply_param(sampling, "min_p", self.enable_min_p_checkbox, self.min_p_spinbox)
+            self._apply_param(sampling, "typical_p", self.enable_typical_p_checkbox, self.typical_p_spinbox)
+            self._apply_param(sampling, "repeat_penalty", self.enable_repeat_penalty_checkbox, self.repeat_penalty_spinbox)
+            self._apply_param(sampling, "repeat_last_n", self.enable_repeat_last_n_checkbox, self.repeat_last_n_spinbox)
+            self._apply_param(sampling, "presence_penalty", self.enable_presence_penalty_checkbox, self.presence_penalty_spinbox)
+            self._apply_param(sampling, "frequency_penalty", self.enable_frequency_penalty_checkbox, self.frequency_penalty_spinbox)
+            self._apply_param(sampling, "mirostat", self.enable_mirostat_checkbox, self.mirostat_spinbox)
+            self._apply_param(sampling, "mirostat_lr", self.enable_mirostat_lr_checkbox, self.mirostat_lr_spinbox)
+            self._apply_param(sampling, "mirostat_ent", self.enable_mirostat_ent_checkbox, self.mirostat_ent_spinbox)
+
+        # Performance parameters
+        if "performance" in config:
+            perf = config["performance"]
+            self._apply_param(perf, "gpu_layers", self.enable_gpu_layers_checkbox, self.gpu_layers_spinbox)
+            self._apply_param(perf, "threads", self.enable_threads_checkbox, self.threads_spinbox)
+            self._apply_param(perf, "threads_batch", self.enable_threads_batch_checkbox, self.threads_batch_spinbox)
+            self._apply_param(perf, "batch_size", self.enable_batch_size_checkbox, self.batch_size_spinbox)
+            self._apply_param(perf, "ubatch_size", self.enable_ubatch_size_checkbox, self.ubatch_size_spinbox)
+            self._apply_param(perf, "n_predict", self.enable_n_predict_checkbox, self.n_predict_spinbox)
+            self._apply_param(perf, "parallel", self.enable_parallel_checkbox, self.parallel_spinbox)
+
+            if "flash_attn" in perf:
+                text = perf["flash_attn"]
+                index = self.flash_attn_combobox.findText(text)
+                if index >= 0:
+                    self.flash_attn_combobox.setCurrentIndex(index)
+
+            self._apply_combo_param(perf, "cache_type_k", self.enable_cache_type_k_checkbox, self.cache_type_k_combobox)
+            self._apply_combo_param(perf, "cache_type_v", self.enable_cache_type_v_checkbox, self.cache_type_v_combobox)
+
+            if "mmap" in perf:
+                self.enable_mmap_checkbox.setChecked(bool(perf["mmap"]))
+            if "mlock" in perf:
+                self.enable_mlock_checkbox.setChecked(bool(perf["mlock"]))
+            if "cont_batching" in perf:
+                self.enable_cont_batching_checkbox.setChecked(bool(perf["cont_batching"]))
+
+        # Advanced Generation parameters
+        if "advanced" in config:
+            adv = config["advanced"]
+            self._apply_param(adv, "spec_draft_n_max", self.enable_spec_draft_n_max_checkbox, self.spec_draft_n_max_spinbox)
+            self._apply_param(adv, "seed", self.enable_seed_checkbox, self.seed_spinbox)
+
+            # Draft model (path-based)
+            if "draft_model" in adv:
+                draft = adv["draft_model"]
+                self.enable_draft_model_checkbox.setChecked(draft.get("enabled", False))
+                self._set_path_field(self.draft_model_line_edit, draft.get("path", ""))
+
+            # Grammar (path-based)
+            if "grammar" in adv:
+                grammar = adv["grammar"]
+                self.enable_grammar_checkbox.setChecked(grammar.get("enabled", False))
+                self._set_path_field(self.grammar_line_edit, grammar.get("path", ""))
+
+            # JSON schema (path-based)
+            if "json_schema" in adv:
+                js = adv["json_schema"]
+                self.enable_json_schema_checkbox.setChecked(js.get("enabled", False))
+                self._set_path_field(self.json_schema_line_edit, js.get("path", ""))
+
+            self._apply_combo_param(adv, "rope_scaling", self.enable_rope_scaling_checkbox, self.rope_scaling_combobox)
+            self._apply_param(adv, "rope_freq_base", self.enable_rope_freq_base_checkbox, self.rope_freq_base_spinbox)
+            self._apply_param(adv, "rope_freq_scale", self.enable_rope_freq_scale_checkbox, self.rope_freq_scale_spinbox)
+
+        # Other settings
+        if "context_size" in config:
+            ctx_size = config["context_size"]
+            for i in range(self.model_context_size.count()):
+                if int(self.model_context_size.itemData(i, Qt.UserRole)) == ctx_size:
+                    self.model_context_size.setCurrentIndex(i)
+                    break
+
+        if "more_options" in config:
+            self.more_options_line_edit.setText(config["more_options"])
+
+        if "no_mmproj_offload" in config:
+            self.no_mmproj_offload_checkbox.setChecked(bool(config["no_mmproj_offload"]))
+
+    def _set_path_field(self, line_edit, path: str) -> None:
+        """Set a path field with full path stored and short filename displayed.
+
+        Args:
+            line_edit: The QLineEdit widget to update.
+            path: The full file path to set.
+        """
+        if path:
+            line_edit.setProperty("fullPath", path)
+            line_edit.setText(path.rsplit("/", 1)[-1])
+        else:
+            line_edit.setProperty("fullPath", "")
+            line_edit.setText("")
+
+    def _apply_param(self, params: dict, name: str, checkbox, spinbox) -> None:
+        """Apply an enabled+value parameter pair to a checkbox and spinbox.
+
+        Args:
+            params: Dictionary containing the parameter data.
+            name: Parameter name key in the dictionary.
+            checkbox: The QCheckBox widget.
+            spinbox: The QSpinBox/QDoubleSpinBox widget.
+        """
+        if name in params:
+            param = params[name]
+            if isinstance(param, dict):
+                checkbox.setChecked(param.get("enabled", False))
+                spinbox.setValue(param.get("value", spinbox.value()))
+            else:
+                # Legacy format: just a value
+                checkbox.setChecked(True)
+                spinbox.setValue(param)
+
+    def _apply_combo_param(self, params: dict, name: str, checkbox, combobox) -> None:
+        """Apply an enabled+value parameter pair to a checkbox and combobox.
+
+        Args:
+            params: Dictionary containing the parameter data.
+            name: Parameter name key in the dictionary.
+            checkbox: The QCheckBox widget.
+            combobox: The QComboBox widget.
+        """
+        if name in params:
+            param = params[name]
+            if isinstance(param, dict):
+                checkbox.setChecked(param.get("enabled", False))
+                text = param.get("value", "")
+                index = combobox.findText(text)
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+            else:
+                # Legacy format: just a value
+                checkbox.setChecked(True)
+                index = combobox.findText(str(param))
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+
+    # ------------------------------------------------------------------
+    # Window lifecycle
+    # ------------------------------------------------------------------
+
+    def closeEvent(self, event) -> None:
+        """Save last session settings when the window is closed.
+
+        Uses QSettings to persist basic connection settings and window
+        geometry so they are restored on the next launch.
+        """
+        self._save_last_session()
+        super().closeEvent(event)
+
+    def _save_last_session(self) -> None:
+        """Save last-used settings to QSettings for session restoration."""
+        settings = QSettings("LLamaLauncher", "LlamaLaunchApp")
+        settings.setValue("lastModelPath", self.model_path_edit.getProperty("fullPath", ""))
+        settings.setValue("host", self.host_line_edit.text())
+        settings.setValue("port", self.port_line_edit.text())
+        settings.setValue("windowGeometry", self.saveGeometry())
+
+    def _load_last_session(self) -> None:
+        """Restore last-used settings from QSettings.
+
+        Pre-populates the UI with the host, port, and model path
+        from the previous session so the user doesn't have to re-enter them.
+        """
+        settings = QSettings("LLamaLauncher", "LlamaLaunchApp")
+
+        # Restore window geometry if saved
+        geometry = settings.value("windowGeometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+
+        # Restore server settings
+        host = settings.value("host", "127.0.0.1")
+        port = settings.value("port", "8080")
+        self.host_line_edit.setText(host)
+        self.port_line_edit.setText(port)
+
+        # Restore model path if available
+        last_model_path = settings.value("lastModelPath", "")
+        if last_model_path:
+            self._set_path_field(self.model_path_edit, last_model_path)
 
     # ------------------------------------------------------------------
     # Signal connections

@@ -157,7 +157,7 @@
 
   | `--draft-min` | Minimum number of draft tokens | `1–2` |
 
-- [ ] Configure adaptive sampling
+- [x ] Configure adaptive sampling
 
   | Parameter | Purpose | Typical Value |
 
@@ -169,7 +169,7 @@
 
   | `--mirostat-ent` | Target entropy level | `5–7` |
 
-- [ ] Configure deterministic generation
+- [x ] Configure deterministic generation
 
   | Parameter | Purpose | Typical Value |
 
@@ -177,7 +177,7 @@
 
   | `--seed` | Random seed for reproducible output | Fixed integer (e.g. `42`) |
 
-- [ ] Configure structured output constraints
+- [x ] Configure structured output constraints
 
   | Parameter | Purpose | Typical Value |
 
@@ -187,7 +187,7 @@
 
   | `--json-schema` | Force JSON schema compliant output | Schema file |
 
-- [ ] Configure model behaviour
+- [x ] Configure model behaviour
 
   | Parameter | Purpose | Typical Value |
 
