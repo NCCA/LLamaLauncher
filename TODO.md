@@ -30,7 +30,7 @@
 
 | 128K | `131072` | Modern long-context models |
 
-[] need to add the other most common parameters used with llama.cpp such as including tool tips.
+[X] need to add the other most common parameters used with llama.cpp such as including tool tips.
 | Parameter | Purpose | Typical Value |
 
 |---|---|---|
