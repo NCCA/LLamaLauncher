@@ -145,7 +145,7 @@
 
 # Advanced Generation
 
-- [ ] Configure speculative decoding / MTP support
+- [x] Configure speculative decoding / MTP support
 
   | Parameter | Purpose | Typical Value |
 
