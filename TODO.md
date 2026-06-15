@@ -61,9 +61,9 @@
 
 ## Performance
 
-- [ ] Configure GPU acceleration
+- [ X] Configure GPU acceleration
 
-  - [ ] Set GPU layer offload
+  - [ X] Set GPU layer offload
 
     | Parameter | Purpose | Typical Value |
 
@@ -71,7 +71,7 @@
 
     | `-ngl` / `--n-gpu-layers` | Number of model layers offloaded to GPU | `99` (full offload if memory allows) |
 
-  - [ ] Configure CPU threading
+  - [ X] Configure CPU threading
 
     | Parameter | Purpose | Typical Value |
 
@@ -81,7 +81,7 @@
 
     | `--threads-batch` | CPU threads used during prompt processing | Higher than generation threads |
 
-  - [ ] Tune batching
+  - [ X] Tune batching
 
     | Parameter | Purpose | Typical Value |
 
@@ -91,7 +91,7 @@
 
     | `-ub` / `--ubatch-size` | Physical micro-batch size | `128–512` |
 
-  - [ ] Configure context size
+  - [ X] Configure context size
 
     | Parameter | Purpose | Typical Value |
 
@@ -101,7 +101,7 @@
 
     | `--n-predict` | Maximum tokens generated | `2048–8192` |
 
-  - [ ] Enable attention optimisations
+  - [ X] Enable attention optimisations
 
     | Parameter | Purpose | Typical Value |
 
@@ -109,7 +109,7 @@
 
     | `--flash-attn` | Enable Flash Attention to reduce memory use and improve speed | `on` |
 
-  - [ ] Optimise KV cache
+  - [ X] Optimise KV cache
 
     | Parameter | Purpose | Typical Value |
 
@@ -119,7 +119,7 @@
 
     | `--cache-type-v` | KV cache value precision | `f16`, `q8_0`, `q4_0` |
 
-  - [ ] Configure memory handling
+  - [ X] Configure memory handling
 
     | Parameter | Purpose | Typical Value |
 
@@ -129,7 +129,7 @@
 
     | `--mlock` | Lock model into RAM to prevent swapping | Enable if enough RAM |
 
-  - [ ] Configure server batching
+  - [ X] Configure server batching
 
     | Parameter | Purpose | Typical Value |
 
