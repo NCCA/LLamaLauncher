@@ -247,6 +247,16 @@ class LlamaLaunchApp(QMainWindow):
         temperature = self.temperature_spinbox.value()
         top_p = self.top_p_spinbox.value()
         top_k = self.top_k_spinbox.value()
+        min_p = self.min_p_spinbox.value()
+        typical_p = self.typical_p_spinbox.value()
+        repeat_penalty = self.repeat_penalty_spinbox.value()
+        repeat_last_n = self.repeat_last_n_spinbox.value()
+        presence_penalty = self.presence_penalty_spinbox.value()
+        frequency_penalty = self.frequency_penalty_spinbox.value()
+
+        mirostat = self.mirostat_spinbox.value()
+        mirostat_lr = self.mirostat_lr_spinbox.value()
+        mirostat_ent = self.mirostat_ent_spinbox.value()
 
         mmproj_path = self.mmproj_path_edit.property("fullPath")
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
@@ -267,6 +277,24 @@ class LlamaLaunchApp(QMainWindow):
             cmd.extend(["--top-p", str(top_p)])
         if self.enable_top_k_checkbox.isChecked():
             cmd.extend(["--top-k", str(top_k)])
+        if self.enable_min_p_checkbox.isChecked():
+            cmd.extend(["--min-p", str(min_p)])
+        if self.enable_typical_p_checkbox.isChecked():
+            cmd.extend(["--typical-p", str(typical_p)])
+        if self.enable_repeat_penalty_checkbox.isChecked():
+            cmd.extend(["--repeat-penalty", str(repeat_penalty)])
+        if self.enable_repeat_last_n_checkbox.isChecked():
+            cmd.extend(["--repeat-last-n", str(repeat_last_n)])
+        if self.enable_presence_penalty_checkbox.isChecked():
+            cmd.extend(["--presence-penalty", str(presence_penalty)])
+        if self.enable_frequency_penalty_checkbox.isChecked():
+            cmd.extend(["--frequency-penalty", str(frequency_penalty)])
+        if self.enable_mirostat_checkbox.isChecked():
+            cmd.extend(["--mirostat", str(mirostat)])
+        if self.enable_mirostat_lr_checkbox.isChecked():
+            cmd.extend(["--mirostat-lr", str(mirostat_lr)])
+        if self.enable_mirostat_ent_checkbox.isChecked():
+            cmd.extend(["--mirostat-ent", str(mirostat_ent)])
 
         host = self.host_line_edit.text() or self._host
         port_str = self.port_line_edit.text() or str(self._port)
