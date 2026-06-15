@@ -225,10 +225,10 @@ class LlamaLaunchApp(QMainWindow):
 
         # Files/Paths
         config["files"] = {
-            "model_path": self.model_path_edit.getProperty("fullPath", ""),
-            "mmproj_path": self.mmproj_path_edit.getProperty("fullPath", ""),
-            "draft_model_path": self.draft_model_line_edit.getProperty("fullPath", ""),
-            "json_schema_path": self.json_schema_line_edit.getProperty("fullPath", ""),
+            "model_path": self.model_path_edit.property("fullPath") or "",
+            "mmproj_path": self.mmproj_path_edit.property("fullPath") or "",
+            "draft_model_path": self.draft_model_line_edit.property("fullPath") or "",
+            "json_schema_path": self.json_schema_line_edit.property("fullPath") or "",
         }
 
         # Server
@@ -273,11 +273,11 @@ class LlamaLaunchApp(QMainWindow):
 
         # Advanced Generation parameters
         config["advanced"] = {
-            "draft_model": {"enabled": self.enable_draft_model_checkbox.isChecked(), "path": self.draft_model_line_edit.getProperty("fullPath", "")},
+            "draft_model": {"enabled": self.enable_draft_model_checkbox.isChecked(), "path": self.draft_model_line_edit.property("fullPath") or ""},
             "spec_draft_n_max": {"enabled": self.enable_spec_draft_n_max_checkbox.isChecked(), "value": self.spec_draft_n_max_spinbox.value()},
             "seed": {"enabled": self.enable_seed_checkbox.isChecked(), "value": self.seed_spinbox.value()},
-            "grammar": {"enabled": self.enable_grammar_checkbox.isChecked(), "path": self.grammar_line_edit.getProperty("fullPath", "")},
-            "json_schema": {"enabled": self.enable_json_schema_checkbox.isChecked(), "path": self.json_schema_line_edit.getProperty("fullPath", "")},
+            "grammar": {"enabled": self.enable_grammar_checkbox.isChecked(), "path": self.grammar_line_edit.property("fullPath") or ""},
+            "json_schema": {"enabled": self.enable_json_schema_checkbox.isChecked(), "path": self.json_schema_line_edit.property("fullPath") or ""},
             "rope_scaling": {"enabled": self.enable_rope_scaling_checkbox.isChecked(), "value": self.rope_scaling_combobox.currentText()},
             "rope_freq_base": {"enabled": self.enable_rope_freq_base_checkbox.isChecked(), "value": self.rope_freq_base_spinbox.value()},
             "rope_freq_scale": {"enabled": self.enable_rope_freq_scale_checkbox.isChecked(), "value": self.rope_freq_scale_spinbox.value()},
@@ -492,7 +492,7 @@ class LlamaLaunchApp(QMainWindow):
     def _save_last_session(self) -> None:
         """Save last-used settings to QSettings for session restoration."""
         settings = QSettings("LLamaLauncher", "LlamaLaunchApp")
-        settings.setValue("lastModelPath", self.model_path_edit.getProperty("fullPath", ""))
+        settings.setValue("lastModelPath", self.model_path_edit.property("fullPath") or "")
         settings.setValue("host", self.host_line_edit.text())
         settings.setValue("port", self.port_line_edit.text())
         settings.setValue("windowGeometry", self.saveGeometry())
