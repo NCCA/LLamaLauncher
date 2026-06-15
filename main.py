@@ -412,6 +412,11 @@ class LlamaLaunchApp(QMainWindow):
             if no_mmproj_offload:
                 cmd.append("--no-mmproj-offload")
 
+        # Extra user-supplied flags from the more options line edit
+        extra = self.more_options_line_edit.text().strip()
+        if extra:
+            cmd.extend(extra.split())
+
         # Context size: only pass --ctx-size when a specific value is selected
         ctx_size = self.model_context_size.itemData(
             self.model_context_size.currentIndex(),
@@ -518,6 +523,5 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     window = LlamaLaunchApp(host=args.host, port=args.port, ctx_size=args.ctx_size)
-    window.resize(800, 600)
     window.show()
     sys.exit(app.exec())
