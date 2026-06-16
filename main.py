@@ -63,7 +63,9 @@ class LlamaLaunchApp(QMainWindow):
         Returns:
             Path to the cache directory (created if it does not exist).
         """
-        cache_dir = Path(QCoreApplication.applicationDirPath()) / ".cache" / "llama-launcher"
+        cache_dir = (
+            Path(QCoreApplication.applicationDirPath()) / ".cache" / "llama-launcher"
+        )
         cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir
 
@@ -83,7 +85,9 @@ class LlamaLaunchApp(QMainWindow):
         profile.setPersistentStoragePath(str(self._cache_dir))
 
         # Persist cookies to disk (not session-only)
-        profile.setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.AllowPersistentCookies)
+        profile.setPersistentCookiesPolicy(
+            QWebEngineProfile.PersistentCookiesPolicy.AllowPersistentCookies
+        )
 
         # Enable disk HTTP cache for faster page loads
         cache_subdir = self._cache_dir / "cache"
@@ -213,7 +217,9 @@ class LlamaLaunchApp(QMainWindow):
                 json.dump(config, f, indent=2)
             self.output_display.appendPlainText(f"Configuration saved to {file_path}")
         except Exception as e:
-            QMessageBox.critical(self, "Save Error", f"Failed to save configuration:\n{e}")
+            QMessageBox.critical(
+                self, "Save Error", f"Failed to save configuration:\n{e}"
+            )
 
     def _collect_config(self) -> dict:
         """Collect all UI widget values into a configuration dictionary.
@@ -234,38 +240,103 @@ class LlamaLaunchApp(QMainWindow):
         # Server
         config["server"] = {
             "host": self.host_line_edit.text(),
-            "port": int(self.port_line_edit.text()) if self.port_line_edit.text().isdigit() else 8080,
+            "port": int(self.port_line_edit.text())
+            if self.port_line_edit.text().isdigit()
+            else 8080,
             "api_key": self.api_key_line_edit.text(),
         }
 
         # Sampling parameters
         config["sampling"] = {
-            "temperature": {"enabled": self.enable_temperature_checkbox.isChecked(), "value": self.temperature_spinbox.value()},
-            "top_p": {"enabled": self.enable_top_p_checkbox.isChecked(), "value": self.top_p_spinbox.value()},
-            "top_k": {"enabled": self.enable_top_k_checkbox.isChecked(), "value": self.top_k_spinbox.value()},
-            "min_p": {"enabled": self.enable_min_p_checkbox.isChecked(), "value": self.min_p_spinbox.value()},
-            "typical_p": {"enabled": self.enable_typical_p_checkbox.isChecked(), "value": self.typical_p_spinbox.value()},
-            "repeat_penalty": {"enabled": self.enable_repeat_penalty_checkbox.isChecked(), "value": self.repeat_penalty_spinbox.value()},
-            "repeat_last_n": {"enabled": self.enable_repeat_last_n_checkbox.isChecked(), "value": self.repeat_last_n_spinbox.value()},
-            "presence_penalty": {"enabled": self.enable_presence_penalty_checkbox.isChecked(), "value": self.presence_penalty_spinbox.value()},
-            "frequency_penalty": {"enabled": self.enable_frequency_penalty_checkbox.isChecked(), "value": self.frequency_penalty_spinbox.value()},
-            "mirostat": {"enabled": self.enable_mirostat_checkbox.isChecked(), "value": self.mirostat_spinbox.value()},
-            "mirostat_lr": {"enabled": self.enable_mirostat_lr_checkbox.isChecked(), "value": self.mirostat_lr_spinbox.value()},
-            "mirostat_ent": {"enabled": self.enable_mirostat_ent_checkbox.isChecked(), "value": self.mirostat_ent_spinbox.value()},
+            "temperature": {
+                "enabled": self.enable_temperature_checkbox.isChecked(),
+                "value": self.temperature_spinbox.value(),
+            },
+            "top_p": {
+                "enabled": self.enable_top_p_checkbox.isChecked(),
+                "value": self.top_p_spinbox.value(),
+            },
+            "top_k": {
+                "enabled": self.enable_top_k_checkbox.isChecked(),
+                "value": self.top_k_spinbox.value(),
+            },
+            "min_p": {
+                "enabled": self.enable_min_p_checkbox.isChecked(),
+                "value": self.min_p_spinbox.value(),
+            },
+            "typical_p": {
+                "enabled": self.enable_typical_p_checkbox.isChecked(),
+                "value": self.typical_p_spinbox.value(),
+            },
+            "repeat_penalty": {
+                "enabled": self.enable_repeat_penalty_checkbox.isChecked(),
+                "value": self.repeat_penalty_spinbox.value(),
+            },
+            "repeat_last_n": {
+                "enabled": self.enable_repeat_last_n_checkbox.isChecked(),
+                "value": self.repeat_last_n_spinbox.value(),
+            },
+            "presence_penalty": {
+                "enabled": self.enable_presence_penalty_checkbox.isChecked(),
+                "value": self.presence_penalty_spinbox.value(),
+            },
+            "frequency_penalty": {
+                "enabled": self.enable_frequency_penalty_checkbox.isChecked(),
+                "value": self.frequency_penalty_spinbox.value(),
+            },
+            "mirostat": {
+                "enabled": self.enable_mirostat_checkbox.isChecked(),
+                "value": self.mirostat_spinbox.value(),
+            },
+            "mirostat_lr": {
+                "enabled": self.enable_mirostat_lr_checkbox.isChecked(),
+                "value": self.mirostat_lr_spinbox.value(),
+            },
+            "mirostat_ent": {
+                "enabled": self.enable_mirostat_ent_checkbox.isChecked(),
+                "value": self.mirostat_ent_spinbox.value(),
+            },
         }
 
         # Performance parameters
         config["performance"] = {
-            "gpu_layers": {"enabled": self.enable_gpu_layers_checkbox.isChecked(), "value": self.gpu_layers_spinbox.value()},
-            "threads": {"enabled": self.enable_threads_checkbox.isChecked(), "value": self.threads_spinbox.value()},
-            "threads_batch": {"enabled": self.enable_threads_batch_checkbox.isChecked(), "value": self.threads_batch_spinbox.value()},
-            "batch_size": {"enabled": self.enable_batch_size_checkbox.isChecked(), "value": self.batch_size_spinbox.value()},
-            "ubatch_size": {"enabled": self.enable_ubatch_size_checkbox.isChecked(), "value": self.ubatch_size_spinbox.value()},
-            "n_predict": {"enabled": self.enable_n_predict_checkbox.isChecked(), "value": self.n_predict_spinbox.value()},
-            "parallel": {"enabled": self.enable_parallel_checkbox.isChecked(), "value": self.parallel_spinbox.value()},
+            "gpu_layers": {
+                "enabled": self.enable_gpu_layers_checkbox.isChecked(),
+                "value": self.gpu_layers_spinbox.value(),
+            },
+            "threads": {
+                "enabled": self.enable_threads_checkbox.isChecked(),
+                "value": self.threads_spinbox.value(),
+            },
+            "threads_batch": {
+                "enabled": self.enable_threads_batch_checkbox.isChecked(),
+                "value": self.threads_batch_spinbox.value(),
+            },
+            "batch_size": {
+                "enabled": self.enable_batch_size_checkbox.isChecked(),
+                "value": self.batch_size_spinbox.value(),
+            },
+            "ubatch_size": {
+                "enabled": self.enable_ubatch_size_checkbox.isChecked(),
+                "value": self.ubatch_size_spinbox.value(),
+            },
+            "n_predict": {
+                "enabled": self.enable_n_predict_checkbox.isChecked(),
+                "value": self.n_predict_spinbox.value(),
+            },
+            "parallel": {
+                "enabled": self.enable_parallel_checkbox.isChecked(),
+                "value": self.parallel_spinbox.value(),
+            },
             "flash_attn": self.flash_attn_combobox.currentText(),
-            "cache_type_k": {"enabled": self.enable_cache_type_k_checkbox.isChecked(), "value": self.cache_type_k_combobox.currentText()},
-            "cache_type_v": {"enabled": self.enable_cache_type_v_checkbox.isChecked(), "value": self.cache_type_v_combobox.currentText()},
+            "cache_type_k": {
+                "enabled": self.enable_cache_type_k_checkbox.isChecked(),
+                "value": self.cache_type_k_combobox.currentText(),
+            },
+            "cache_type_v": {
+                "enabled": self.enable_cache_type_v_checkbox.isChecked(),
+                "value": self.cache_type_v_combobox.currentText(),
+            },
             "mmap": self.enable_mmap_checkbox.isChecked(),
             "mlock": self.enable_mlock_checkbox.isChecked(),
             "cont_batching": self.enable_cont_batching_checkbox.isChecked(),
@@ -273,18 +344,44 @@ class LlamaLaunchApp(QMainWindow):
 
         # Advanced Generation parameters
         config["advanced"] = {
-            "draft_model": {"enabled": self.enable_draft_model_checkbox.isChecked(), "path": self.draft_model_line_edit.property("fullPath") or ""},
-            "spec_draft_n_max": {"enabled": self.enable_spec_draft_n_max_checkbox.isChecked(), "value": self.spec_draft_n_max_spinbox.value()},
-            "seed": {"enabled": self.enable_seed_checkbox.isChecked(), "value": self.seed_spinbox.value()},
-            "grammar": {"enabled": self.enable_grammar_checkbox.isChecked(), "path": self.grammar_line_edit.property("fullPath") or ""},
-            "json_schema": {"enabled": self.enable_json_schema_checkbox.isChecked(), "path": self.json_schema_line_edit.property("fullPath") or ""},
-            "rope_scaling": {"enabled": self.enable_rope_scaling_checkbox.isChecked(), "value": self.rope_scaling_combobox.currentText()},
-            "rope_freq_base": {"enabled": self.enable_rope_freq_base_checkbox.isChecked(), "value": self.rope_freq_base_spinbox.value()},
-            "rope_freq_scale": {"enabled": self.enable_rope_freq_scale_checkbox.isChecked(), "value": self.rope_freq_scale_spinbox.value()},
+            "draft_model": {
+                "enabled": self.enable_draft_model_checkbox.isChecked(),
+                "path": self.draft_model_line_edit.property("fullPath") or "",
+            },
+            "spec_draft_n_max": {
+                "enabled": self.enable_spec_draft_n_max_checkbox.isChecked(),
+                "value": self.spec_draft_n_max_spinbox.value(),
+            },
+            "seed": {
+                "enabled": self.enable_seed_checkbox.isChecked(),
+                "value": self.seed_spinbox.value(),
+            },
+            "grammar": {
+                "enabled": self.enable_grammar_checkbox.isChecked(),
+                "path": self.grammar_line_edit.property("fullPath") or "",
+            },
+            "json_schema": {
+                "enabled": self.enable_json_schema_checkbox.isChecked(),
+                "path": self.json_schema_line_edit.property("fullPath") or "",
+            },
+            "rope_scaling": {
+                "enabled": self.enable_rope_scaling_checkbox.isChecked(),
+                "value": self.rope_scaling_combobox.currentText(),
+            },
+            "rope_freq_base": {
+                "enabled": self.enable_rope_freq_base_checkbox.isChecked(),
+                "value": self.rope_freq_base_spinbox.value(),
+            },
+            "rope_freq_scale": {
+                "enabled": self.enable_rope_freq_scale_checkbox.isChecked(),
+                "value": self.rope_freq_scale_spinbox.value(),
+            },
         }
 
         # Other settings
-        config["context_size"] = self.model_context_size.itemData(self.model_context_size.currentIndex(), Qt.UserRole)
+        config["context_size"] = self.model_context_size.itemData(
+            self.model_context_size.currentIndex(), Qt.UserRole
+        )
         config["more_options"] = self.more_options_line_edit.text()
         config["no_mmproj_offload"] = self.no_mmproj_offload_checkbox.isChecked()
 
@@ -306,11 +403,15 @@ class LlamaLaunchApp(QMainWindow):
                 config = json.load(f)
             self._apply_config(config)
             self._last_config_path = file_path
-            self.output_display.appendPlainText(f"Configuration loaded from {file_path}")
+            self.output_display.appendPlainText(
+                f"Configuration loaded from {file_path}"
+            )
         except json.JSONDecodeError as e:
             QMessageBox.critical(self, "Load Error", f"Invalid JSON format:\n{e}")
         except Exception as e:
-            QMessageBox.critical(self, "Load Error", f"Failed to load configuration:\n{e}")
+            QMessageBox.critical(
+                self, "Load Error", f"Failed to load configuration:\n{e}"
+            )
 
     def _apply_config(self, config: dict) -> None:
         """Apply configuration values from a dictionary to the UI widgets.
@@ -323,8 +424,12 @@ class LlamaLaunchApp(QMainWindow):
             files = config["files"]
             self._set_path_field(self.model_path_edit, files.get("model_path", ""))
             self._set_path_field(self.mmproj_path_edit, files.get("mmproj_path", ""))
-            self._set_path_field(self.draft_model_line_edit, files.get("draft_model_path", ""))
-            self._set_path_field(self.json_schema_line_edit, files.get("json_schema_path", ""))
+            self._set_path_field(
+                self.draft_model_line_edit, files.get("draft_model_path", "")
+            )
+            self._set_path_field(
+                self.json_schema_line_edit, files.get("json_schema_path", "")
+            )
 
         # Server
         if "server" in config:
@@ -337,29 +442,109 @@ class LlamaLaunchApp(QMainWindow):
         # Sampling parameters
         if "sampling" in config:
             sampling = config["sampling"]
-            self._apply_param(sampling, "temperature", self.enable_temperature_checkbox, self.temperature_spinbox)
-            self._apply_param(sampling, "top_p", self.enable_top_p_checkbox, self.top_p_spinbox)
-            self._apply_param(sampling, "top_k", self.enable_top_k_checkbox, self.top_k_spinbox)
-            self._apply_param(sampling, "min_p", self.enable_min_p_checkbox, self.min_p_spinbox)
-            self._apply_param(sampling, "typical_p", self.enable_typical_p_checkbox, self.typical_p_spinbox)
-            self._apply_param(sampling, "repeat_penalty", self.enable_repeat_penalty_checkbox, self.repeat_penalty_spinbox)
-            self._apply_param(sampling, "repeat_last_n", self.enable_repeat_last_n_checkbox, self.repeat_last_n_spinbox)
-            self._apply_param(sampling, "presence_penalty", self.enable_presence_penalty_checkbox, self.presence_penalty_spinbox)
-            self._apply_param(sampling, "frequency_penalty", self.enable_frequency_penalty_checkbox, self.frequency_penalty_spinbox)
-            self._apply_param(sampling, "mirostat", self.enable_mirostat_checkbox, self.mirostat_spinbox)
-            self._apply_param(sampling, "mirostat_lr", self.enable_mirostat_lr_checkbox, self.mirostat_lr_spinbox)
-            self._apply_param(sampling, "mirostat_ent", self.enable_mirostat_ent_checkbox, self.mirostat_ent_spinbox)
+            self._apply_param(
+                sampling,
+                "temperature",
+                self.enable_temperature_checkbox,
+                self.temperature_spinbox,
+            )
+            self._apply_param(
+                sampling, "top_p", self.enable_top_p_checkbox, self.top_p_spinbox
+            )
+            self._apply_param(
+                sampling, "top_k", self.enable_top_k_checkbox, self.top_k_spinbox
+            )
+            self._apply_param(
+                sampling, "min_p", self.enable_min_p_checkbox, self.min_p_spinbox
+            )
+            self._apply_param(
+                sampling,
+                "typical_p",
+                self.enable_typical_p_checkbox,
+                self.typical_p_spinbox,
+            )
+            self._apply_param(
+                sampling,
+                "repeat_penalty",
+                self.enable_repeat_penalty_checkbox,
+                self.repeat_penalty_spinbox,
+            )
+            self._apply_param(
+                sampling,
+                "repeat_last_n",
+                self.enable_repeat_last_n_checkbox,
+                self.repeat_last_n_spinbox,
+            )
+            self._apply_param(
+                sampling,
+                "presence_penalty",
+                self.enable_presence_penalty_checkbox,
+                self.presence_penalty_spinbox,
+            )
+            self._apply_param(
+                sampling,
+                "frequency_penalty",
+                self.enable_frequency_penalty_checkbox,
+                self.frequency_penalty_spinbox,
+            )
+            self._apply_param(
+                sampling,
+                "mirostat",
+                self.enable_mirostat_checkbox,
+                self.mirostat_spinbox,
+            )
+            self._apply_param(
+                sampling,
+                "mirostat_lr",
+                self.enable_mirostat_lr_checkbox,
+                self.mirostat_lr_spinbox,
+            )
+            self._apply_param(
+                sampling,
+                "mirostat_ent",
+                self.enable_mirostat_ent_checkbox,
+                self.mirostat_ent_spinbox,
+            )
 
         # Performance parameters
         if "performance" in config:
             perf = config["performance"]
-            self._apply_param(perf, "gpu_layers", self.enable_gpu_layers_checkbox, self.gpu_layers_spinbox)
-            self._apply_param(perf, "threads", self.enable_threads_checkbox, self.threads_spinbox)
-            self._apply_param(perf, "threads_batch", self.enable_threads_batch_checkbox, self.threads_batch_spinbox)
-            self._apply_param(perf, "batch_size", self.enable_batch_size_checkbox, self.batch_size_spinbox)
-            self._apply_param(perf, "ubatch_size", self.enable_ubatch_size_checkbox, self.ubatch_size_spinbox)
-            self._apply_param(perf, "n_predict", self.enable_n_predict_checkbox, self.n_predict_spinbox)
-            self._apply_param(perf, "parallel", self.enable_parallel_checkbox, self.parallel_spinbox)
+            self._apply_param(
+                perf,
+                "gpu_layers",
+                self.enable_gpu_layers_checkbox,
+                self.gpu_layers_spinbox,
+            )
+            self._apply_param(
+                perf, "threads", self.enable_threads_checkbox, self.threads_spinbox
+            )
+            self._apply_param(
+                perf,
+                "threads_batch",
+                self.enable_threads_batch_checkbox,
+                self.threads_batch_spinbox,
+            )
+            self._apply_param(
+                perf,
+                "batch_size",
+                self.enable_batch_size_checkbox,
+                self.batch_size_spinbox,
+            )
+            self._apply_param(
+                perf,
+                "ubatch_size",
+                self.enable_ubatch_size_checkbox,
+                self.ubatch_size_spinbox,
+            )
+            self._apply_param(
+                perf,
+                "n_predict",
+                self.enable_n_predict_checkbox,
+                self.n_predict_spinbox,
+            )
+            self._apply_param(
+                perf, "parallel", self.enable_parallel_checkbox, self.parallel_spinbox
+            )
 
             if "flash_attn" in perf:
                 text = perf["flash_attn"]
@@ -367,20 +552,37 @@ class LlamaLaunchApp(QMainWindow):
                 if index >= 0:
                     self.flash_attn_combobox.setCurrentIndex(index)
 
-            self._apply_combo_param(perf, "cache_type_k", self.enable_cache_type_k_checkbox, self.cache_type_k_combobox)
-            self._apply_combo_param(perf, "cache_type_v", self.enable_cache_type_v_checkbox, self.cache_type_v_combobox)
+            self._apply_combo_param(
+                perf,
+                "cache_type_k",
+                self.enable_cache_type_k_checkbox,
+                self.cache_type_k_combobox,
+            )
+            self._apply_combo_param(
+                perf,
+                "cache_type_v",
+                self.enable_cache_type_v_checkbox,
+                self.cache_type_v_combobox,
+            )
 
             if "mmap" in perf:
                 self.enable_mmap_checkbox.setChecked(bool(perf["mmap"]))
             if "mlock" in perf:
                 self.enable_mlock_checkbox.setChecked(bool(perf["mlock"]))
             if "cont_batching" in perf:
-                self.enable_cont_batching_checkbox.setChecked(bool(perf["cont_batching"]))
+                self.enable_cont_batching_checkbox.setChecked(
+                    bool(perf["cont_batching"])
+                )
 
         # Advanced Generation parameters
         if "advanced" in config:
             adv = config["advanced"]
-            self._apply_param(adv, "spec_draft_n_max", self.enable_spec_draft_n_max_checkbox, self.spec_draft_n_max_spinbox)
+            self._apply_param(
+                adv,
+                "spec_draft_n_max",
+                self.enable_spec_draft_n_max_checkbox,
+                self.spec_draft_n_max_spinbox,
+            )
             self._apply_param(adv, "seed", self.enable_seed_checkbox, self.seed_spinbox)
 
             # Draft model (path-based)
@@ -401,9 +603,24 @@ class LlamaLaunchApp(QMainWindow):
                 self.enable_json_schema_checkbox.setChecked(js.get("enabled", False))
                 self._set_path_field(self.json_schema_line_edit, js.get("path", ""))
 
-            self._apply_combo_param(adv, "rope_scaling", self.enable_rope_scaling_checkbox, self.rope_scaling_combobox)
-            self._apply_param(adv, "rope_freq_base", self.enable_rope_freq_base_checkbox, self.rope_freq_base_spinbox)
-            self._apply_param(adv, "rope_freq_scale", self.enable_rope_freq_scale_checkbox, self.rope_freq_scale_spinbox)
+            self._apply_combo_param(
+                adv,
+                "rope_scaling",
+                self.enable_rope_scaling_checkbox,
+                self.rope_scaling_combobox,
+            )
+            self._apply_param(
+                adv,
+                "rope_freq_base",
+                self.enable_rope_freq_base_checkbox,
+                self.rope_freq_base_spinbox,
+            )
+            self._apply_param(
+                adv,
+                "rope_freq_scale",
+                self.enable_rope_freq_scale_checkbox,
+                self.rope_freq_scale_spinbox,
+            )
 
         # Other settings
         if "context_size" in config:
@@ -417,7 +634,9 @@ class LlamaLaunchApp(QMainWindow):
             self.more_options_line_edit.setText(config["more_options"])
 
         if "no_mmproj_offload" in config:
-            self.no_mmproj_offload_checkbox.setChecked(bool(config["no_mmproj_offload"]))
+            self.no_mmproj_offload_checkbox.setChecked(
+                bool(config["no_mmproj_offload"])
+            )
 
     def _set_path_field(self, line_edit, path: str) -> None:
         """Set a path field with full path stored and short filename displayed.
@@ -492,7 +711,9 @@ class LlamaLaunchApp(QMainWindow):
     def _save_last_session(self) -> None:
         """Save last-used settings to QSettings for session restoration."""
         settings = QSettings("LLamaLauncher", "LlamaLaunchApp")
-        settings.setValue("lastModelPath", self.model_path_edit.property("fullPath") or "")
+        settings.setValue(
+            "lastModelPath", self.model_path_edit.property("fullPath") or ""
+        )
         settings.setValue("host", self.host_line_edit.text())
         settings.setValue("port", self.port_line_edit.text())
         settings.setValue("windowGeometry", self.saveGeometry())
@@ -636,7 +857,9 @@ class LlamaLaunchApp(QMainWindow):
     def _force_kill_if_needed(self) -> None:
         """Force kill the process if graceful termination did not work."""
         if self._process.state() == QProcess.Running:
-            self.output_display.appendPlainText("Server didn't stop gracefully. Force killing...")
+            self.output_display.appendPlainText(
+                "Server didn't stop gracefully. Force killing..."
+            )
             self._process.kill()
 
     def _reset_launch_button(self) -> None:
@@ -690,7 +913,9 @@ class LlamaLaunchApp(QMainWindow):
 
         mmproj_path = self.mmproj_path_edit.property("fullPath")
         no_mmproj_offload = self.no_mmproj_offload_checkbox.isChecked()
-        api_key = self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
+        api_key = (
+            self.api_key_line_edit.text() if self.api_key_line_edit.text() else "12345"
+        )
 
         # Build command: llama-server --model ... (conditional sampling params) ...
         cmd = [
@@ -827,7 +1052,11 @@ class LlamaLaunchApp(QMainWindow):
         Also watches for the server URL pattern (http://HOST:PORT) in the
         output and auto-refreshes the web view once the server is ready.
         """
-        data = self._process.readAllStandardOutput().data().decode("utf-8", errors="replace")
+        data = (
+            self._process.readAllStandardOutput()
+            .data()
+            .decode("utf-8", errors="replace")
+        )
         if data:
             self.output_display.appendPlainText(data)
             self._check_and_refresh()
@@ -838,7 +1067,11 @@ class LlamaLaunchApp(QMainWindow):
         Also watches for the server URL pattern (http://HOST:PORT) in the
         output and auto-refreshes the web view once the server is ready.
         """
-        data = self._process.readAllStandardError().data().decode("utf-8", errors="replace")
+        data = (
+            self._process.readAllStandardError()
+            .data()
+            .decode("utf-8", errors="replace")
+        )
         if data:
             self.output_display.appendPlainText(data)
             self._check_and_refresh()
@@ -863,7 +1096,9 @@ class LlamaLaunchApp(QMainWindow):
         """Reload the server web view to fetch the freshly started server."""
         url = QUrl(self._server_url)
         self.server_web_view.setUrl(url)
-        self.output_display.appendPlainText(f"\n[Server ready — refreshed web view at {self._server_url}]")
+        self.output_display.appendPlainText(
+            f"\n[Server ready — refreshed web view at {self._server_url}]"
+        )
 
     def _on_error(self, error: QProcess.ProcessError) -> None:
         """Called when the process encounters an error (e.g. not found)."""
@@ -874,9 +1109,13 @@ class LlamaLaunchApp(QMainWindow):
     def _on_finished(self, code: int, status: QProcess.ExitStatus) -> None:
         """Called when the child process exits."""
         if status == QProcess.ExitStatus.NormalExit:
-            self.output_display.appendPlainText(f"\n--- Process exited with code {code} ---")
+            self.output_display.appendPlainText(
+                f"\n--- Process exited with code {code} ---"
+            )
         else:
-            self.output_display.appendPlainText(f"\n--- Process terminated abnormally (code {code}) ---")
+            self.output_display.appendPlainText(
+                f"\n--- Process terminated abnormally (code {code}) ---"
+            )
         self._reset_launch_button()
 
 
@@ -887,7 +1126,9 @@ if __name__ == "__main__":
         default="127.0.0.1",
         help="Host address for the server (default: 127.0.0.1)",
     )
-    parser.add_argument("--port", type=int, default=8080, help="Port for the server (default: 8080)")
+    parser.add_argument(
+        "--port", type=int, default=8080, help="Port for the server (default: 8080)"
+    )
     parser.add_argument(
         "-c",
         "--ctx-size",

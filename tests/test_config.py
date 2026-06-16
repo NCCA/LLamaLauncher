@@ -215,7 +215,9 @@ class TestFilePaths:
 
     def test_collects_model_path_from_fullPath_property(self) -> None:
         """2.1.2: model_path comes from the fullPath property of the path edit."""
-        collector = _make_collector(model_path_edit=MockPathEdit(_full_path="/models/llama.gguf"))
+        collector = _make_collector(
+            model_path_edit=MockPathEdit(_full_path="/models/llama.gguf")
+        )
         config = collector.collect_config()
 
         assert config["files"]["model_path"] == "/models/llama.gguf"

@@ -1,10 +1,16 @@
-"""Shared pytest fixtures for the LLamaLauncher test suite."""
+"""Shared pytest fixtures LLamaLauncher test suite."""
 
-import os
+import sys
 import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+# Allow importing production modules from project root in tests
+_project_root = str(Path(__file__).resolve().parent.parent)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 
 @pytest.fixture(scope="session", autouse=True)
