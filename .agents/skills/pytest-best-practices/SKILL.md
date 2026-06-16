@@ -342,6 +342,25 @@ modes covered
 
 ------------------------------------------------------------------------
 
+# Style
+
+When grouping tests, prefer function-based grouping over class-based grouping. 
+
+If a test needs shared state, prefer a fixture over a class. 
+
+If a test needs to be grouped logically, prefer class-based grouping over function-based grouping.
+
+Can use @pytest.mark. to group tests by category or feature.
+
+| Situation | Use |
+|---|---|
+| Single behaviour | Function |
+| Fixture-based tests | Function |
+| Parameterised tests | Function |
+| Many related behaviours | Class |
+| Large feature area | Class |
+| Need shared state | Usually fixture, not class |
+
 # Final Checklist
 
 -   [ ] Test name explains behaviour
