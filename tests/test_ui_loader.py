@@ -14,95 +14,110 @@ from PySide6.QtWidgets import QDialog, QLayout, QMainWindow, QWidget
 from ui_loader import load_ui
 
 
-@pytest.mark.file_errors
-def test_load_ui_raises_when_file_does_not_exist():
-    """1.2.1: load_ui() raises RuntimeError when UI file does not exist.
+@pytest.fixture
+def mock_file_open_failure():
+    """1.2.1/1.2.2: Patch QFile to simulate open() failure.
 
-    QFile.open() returns False for non-existent paths, triggering
-    the RuntimeError at ui_loader.py L24-26.
+    Returns the patched QFile class mock for tests that expect
+    RuntimeError when the UI file cannot be opened.
     """
     with patch("ui_loader.QFile") as mock_qfile_cls:
         mock_qfile = MagicMock()
         mock_qfile_cls.return_value = mock_qfile
         mock_qfile.open.return_value = False
-
-        parent = QWidget()
-
-        with pytest.raises(RuntimeError, match="Cannot open UI file"):
-            load_ui("/nonexistent/path.ui", parent)
+        yield mock_qfile_cls
 
 
-@pytest.mark.file_errors
-def test_load_ui_raises_when_file_open_fails():
-    """1.2.2: load_ui() raises RuntimeError when UI file fails to open.
+@pytest.fixture
+def mock_qt():
+    """Module-level fixture for successful UI loading scenarios.
 
-    Even when the path exists, opening may fail (e.g. permissions).
-    QFile.open() returns False, triggering RuntimeError at L24-26.
-    """
-    with patch("ui_loader.QFile") as mock_qfile_cls:
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = False
+    Patches QFile, QUiLoader, and QVBoxLayout, then yields a factory
+    function that creates fresh mock instances per test. This ensures
+    each test gets isolated mocks with no shared mutable state.
 
-        parent = QWidget()
-
-        with pytest.raises(RuntimeError, match="Cannot open UI file"):
-            load_ui(Path("/restricted/path.ui"), parent)
-
-
-@pytest.mark.file_errors
-def test_load_ui_raises_when_file_is_invalid():
-    """1.2.3: load_ui() raises RuntimeError when UI file is invalid/empty.
-
-    QUiLoader.load() returns None for malformed XML, triggering
-    the RuntimeError at ui_loader.py L31-32.
-    """
-    with patch("ui_loader.QFile") as mock_qfile_cls, patch("ui_loader.QUiLoader") as mock_loader_cls:
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
-
-        mock_loader = MagicMock()
-        mock_loader_cls.return_value = mock_loader
-        mock_loader.load.return_value = None
-
-        parent = QWidget()
-
-        with pytest.raises(RuntimeError, match="Failed to load UI file"):
-            load_ui("/invalid/ui.ui", parent)
-
-
-@pytest.mark.widget_assignment
-def test_load_ui_assigns_widget_attributes_by_object_name():
-    """1.2.4: load_ui() assigns widget attributes by objectName (QWidget).
-
-    Widgets returned by findChildren(QWidget) with non-empty objectName
-    are set as attributes on the parent widget.
+    Yields:
+        make_mocks: callable that returns a namespace with:
+            - mock_qfile_cls: the patched QFile class mock
+            - mock_loader_cls: the patched QUiLoader class mock
+            - mock_vbox_cls: the patched QVBoxLayout class mock
+            - mock_ui: a fresh MagicMock for the loaded UI
+            - mock_loader: a fresh QUiLoader instance mock
+            - mock_container: a fresh QVBoxLayout instance mock
     """
     with (
         patch("ui_loader.QFile") as mock_qfile_cls,
         patch("ui_loader.QUiLoader") as mock_loader_cls,
         patch("ui_loader.QVBoxLayout") as mock_vbox_cls,
     ):
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
 
-        # Create mock widgets with objectNames
+        def make_mocks():
+            """Create a fresh set of mock instances for one test."""
+            mock_qfile = MagicMock()
+            mock_qfile_cls.return_value = mock_qfile
+            mock_qfile.open.return_value = True
+
+            mock_ui = MagicMock()
+            mock_ui.layout.return_value = None
+            mock_ui.windowTitle.return_value = ""
+            mock_ui.size.return_value = QSize(0, 0)
+
+            mock_loader = mock_loader_cls.return_value
+            mock_loader.load.return_value = mock_ui
+
+            mock_container = mock_vbox_cls.return_value
+
+            return MagicMock(
+                mock_qfile_cls=mock_qfile_cls,
+                mock_loader_cls=mock_loader_cls,
+                mock_vbox_cls=mock_vbox_cls,
+                mock_ui=mock_ui,
+                mock_loader=mock_loader,
+                mock_container=mock_container,
+            )
+
+        yield make_mocks
+
+
+class TestLoadUIFileErrors:
+    """1.2.1-1.2.3: Error handling when UI files cannot be loaded."""
+
+    def test_load_ui_raises_when_file_does_not_exist(self, mock_file_open_failure):
+        """1.2.1: load_ui() raises RuntimeError when UI file does not exist."""
+        parent = QWidget()
+        with pytest.raises(RuntimeError, match="Cannot open UI file"):
+            load_ui("/nonexistent/path.ui", parent)
+
+    def test_load_ui_raises_when_file_open_fails(self, mock_file_open_failure):
+        """1.2.2: load_ui() raises RuntimeError when UI file fails to open."""
+        parent = QWidget()
+        with pytest.raises(RuntimeError, match="Cannot open UI file"):
+            load_ui(Path("/restricted/path.ui"), parent)
+
+    def test_load_ui_raises_when_file_is_invalid(self, mock_qt):
+        """1.2.3: load_ui() raises RuntimeError when UI file is invalid/empty."""
+        mocks = mock_qt()
+        mocks.mock_loader.load.return_value = None
+
+        parent = QWidget()
+        with pytest.raises(RuntimeError, match="Failed to load UI file"):
+            load_ui("/invalid/ui.ui", parent)
+
+
+class TestLoadUIWidgetAttributeAssignment:
+    """1.2.4-1.2.6: Widget and layout attribute assignment by objectName."""
+
+    def test_load_ui_assigns_widget_attributes_by_object_name(self, mock_qt):
+        """1.2.4: load_ui() assigns widget attributes by objectName (QWidget)."""
+        mocks = mock_qt()
+
         mock_button = MagicMock(spec=QWidget)
         mock_button.objectName.return_value = "myButton"
 
         mock_label = MagicMock(spec=QWidget)
         mock_label.objectName.return_value = "myLabel"
 
-        mock_ui = MagicMock()
-        mock_ui.findChildren.return_value = [mock_button, mock_label]
-        mock_ui.layout.return_value = None
-        mock_ui.windowTitle.return_value = ""
-        mock_ui.size.return_value = QSize(0, 0)
-
-        mock_loader_instance = mock_loader_cls.return_value
-        mock_loader_instance.load.return_value = mock_ui
+        mocks.mock_ui.findChildren.return_value = [mock_button, mock_label]
 
         parent = QWidget()
         load_ui("/test/ui.ui", parent)
@@ -110,74 +125,34 @@ def test_load_ui_assigns_widget_attributes_by_object_name():
         assert parent.myButton is mock_button
         assert parent.myLabel is mock_label
 
-
-@pytest.mark.widget_assignment
-def test_load_ui_assigns_layout_attributes_by_object_name():
-    """1.2.5: load_ui() assigns layout attributes by objectName.
-
-    Layouts returned by findChildren(QLayout) with non-empty objectName
-    are set as attributes on the parent widget.
-    """
-    with (
-        patch("ui_loader.QFile") as mock_qfile_cls,
-        patch("ui_loader.QUiLoader") as mock_loader_cls,
-        patch("ui_loader.QVBoxLayout") as mock_vbox_cls,
-    ):
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
+    def test_load_ui_assigns_layout_attributes_by_object_name(self, mock_qt):
+        """1.2.5: load_ui() assigns layout attributes by objectName."""
+        mocks = mock_qt()
 
         mock_layout = MagicMock(spec=QLayout)
         mock_layout.objectName.return_value = "mainLayout"
-
-        mock_ui = MagicMock()
 
         def find_children(cls):
             if cls == QLayout:
                 return [mock_layout]
             return []
 
-        mock_ui.findChildren.side_effect = find_children
-        mock_ui.layout.return_value = None
-        mock_ui.windowTitle.return_value = ""
-        mock_ui.size.return_value = QSize(0, 0)
-
-        mock_loader_instance = mock_loader_cls.return_value
-        mock_loader_instance.load.return_value = mock_ui
+        mocks.mock_ui.findChildren.side_effect = find_children
 
         parent = QWidget()
         load_ui("/test/ui.ui", parent)
 
         assert parent.mainLayout is mock_layout
 
-
-@pytest.mark.widget_assignment
-def test_load_ui_captures_top_level_layout_not_in_find_children():
-    """1.2.6: load_ui() captures top-level layout when not found by findChildren.
-
-    The main layout from loaded_ui.layout() is captured as an attribute
-    when it has a name and isn't already set via findChildren.
-    """
-    with (
-        patch("ui_loader.QFile") as mock_qfile_cls,
-        patch("ui_loader.QUiLoader") as mock_loader_cls,
-        patch("ui_loader.QVBoxLayout") as mock_vbox_cls,
-    ):
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
+    def test_load_ui_captures_top_level_layout_not_in_find_children(self, mock_qt):
+        """1.2.6: load_ui() captures top-level layout when not found by findChildren."""
+        mocks = mock_qt()
 
         mock_main_layout = MagicMock(spec=QLayout)
         mock_main_layout.objectName.return_value = "topLevelLayout"
 
-        mock_ui = MagicMock()
-        mock_ui.findChildren.return_value = []  # Not found by findChildren
-        mock_ui.layout.return_value = mock_main_layout
-        mock_ui.windowTitle.return_value = ""
-        mock_ui.size.return_value = QSize(0, 0)
-
-        mock_loader_instance = mock_loader_cls.return_value
-        mock_loader_instance.load.return_value = mock_ui
+        mocks.mock_ui.findChildren.return_value = []
+        mocks.mock_ui.layout.return_value = mock_main_layout
 
         parent = QWidget()
         load_ui("/test/ui.ui", parent)
@@ -185,30 +160,19 @@ def test_load_ui_captures_top_level_layout_not_in_find_children():
         assert parent.topLevelLayout is mock_main_layout
 
 
-@pytest.mark.parent_type_setup
-def test_load_ui_sets_up_dialog_correctly():
-    """1.2.7: load_ui() sets up QDialog correctly (layout, title, size).
+class TestLoadUISetupByParentType:
+    """1.2.7-1.2.9: Widget setup for different parent widget types."""
 
-    When parent is a QDialog:
-    - loaded_ui.layout() is set on the dialog
-    - window title is applied from loaded_ui
-    - size is applied from loaded_ui
-    """
-    with patch("ui_loader.QFile") as mock_qfile_cls, patch("ui_loader.QUiLoader") as mock_loader_cls:
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
+    def test_load_ui_sets_up_dialog_correctly(self, mock_qt):
+        """1.2.7: load_ui() sets up QDialog correctly (layout, title, size)."""
+        mocks = mock_qt()
 
         mock_layout = MagicMock()
-        mock_layout.objectName.return_value = ""  # skip top-level capture step
+        mock_layout.objectName.return_value = ""
 
-        mock_ui = MagicMock()
-        mock_ui.layout.return_value = mock_layout
-        mock_ui.windowTitle.return_value = "My Dialog"
-        mock_ui.size.return_value = QSize(400, 300)
-
-        mock_loader_instance = mock_loader_cls.return_value
-        mock_loader_instance.load.return_value = mock_ui
+        mocks.mock_ui.layout.return_value = mock_layout
+        mocks.mock_ui.windowTitle.return_value = "My Dialog"
+        mocks.mock_ui.size.return_value = QSize(400, 300)
 
         parent = QDialog()
         parent.setLayout = MagicMock()
@@ -220,28 +184,12 @@ def test_load_ui_sets_up_dialog_correctly():
         parent.setWindowTitle.assert_called_with("My Dialog")
         parent.resize.assert_called_with(QSize(400, 300))
 
+    def test_load_ui_sets_up_main_window_correctly(self, mock_qt):
+        """1.2.8: load_ui() sets up QMainWindow correctly (central widget, title, size)."""
+        mocks = mock_qt()
 
-@pytest.mark.parent_type_setup
-def test_load_ui_sets_up_main_window_correctly():
-    """1.2.8: load_ui() sets up QMainWindow correctly (central widget, title, size).
-
-    When parent is a QMainWindow:
-    - loaded_ui becomes the central widget
-    - window title is applied from loaded_ui
-    - size is applied from loaded_ui
-    """
-    with patch("ui_loader.QFile") as mock_qfile_cls, patch("ui_loader.QUiLoader") as mock_loader_cls:
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
-
-        mock_ui = MagicMock()
-        mock_ui.layout.return_value = None
-        mock_ui.windowTitle.return_value = "My Window"
-        mock_ui.size.return_value = QSize(800, 600)
-
-        mock_loader_instance = mock_loader_cls.return_value
-        mock_loader_instance.load.return_value = mock_ui
+        mocks.mock_ui.windowTitle.return_value = "My Window"
+        mocks.mock_ui.size.return_value = QSize(800, 600)
 
         parent = QMainWindow()
         parent.setCentralWidget = MagicMock()
@@ -249,80 +197,38 @@ def test_load_ui_sets_up_main_window_correctly():
         parent.resize = MagicMock()
         load_ui("/test/window.ui", parent)
 
-        parent.setCentralWidget.assert_called_with(mock_ui)
+        parent.setCentralWidget.assert_called_with(mocks.mock_ui)
         parent.setWindowTitle.assert_called_with("My Window")
         parent.resize.assert_called_with(QSize(800, 600))
 
+    def test_load_ui_embeds_widget_via_zero_margin_layout(self, mock_qt):
+        """1.2.9: load_ui() embeds QWidget via zero-margin layout."""
+        mocks = mock_qt()
 
-@pytest.mark.parent_type_setup
-def test_load_ui_embeds_widget_via_zero_margin_layout():
-    """1.2.9: load_ui() embeds QWidget via zero-margin layout for non-dialog/mainwindow parents.
-
-    When parent is a plain QWidget (not QDialog or QMainWindow):
-    - QVBoxLayout is created with parent and zero contents margins
-    - loaded_ui is added to that layout
-    - window title and size are applied from loaded_ui
-    """
-    with (
-        patch("ui_loader.QFile") as mock_qfile_cls,
-        patch("ui_loader.QUiLoader") as mock_loader_cls,
-        patch("ui_loader.QVBoxLayout") as mock_vbox_cls,
-    ):
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
-
-        mock_ui = MagicMock()
-        mock_ui.layout.return_value = None
-        mock_ui.windowTitle.return_value = "Embedded UI"
-        mock_ui.size.return_value = QSize(300, 200)
-
-        mock_loader_instance = mock_loader_cls.return_value
-        mock_loader_instance.load.return_value = mock_ui
-
-        mock_container = MagicMock()
-        mock_vbox_cls.return_value = mock_container
+        mocks.mock_ui.windowTitle.return_value = "Embedded UI"
+        mocks.mock_ui.size.return_value = QSize(300, 200)
 
         parent = QWidget()
         parent.setWindowTitle = MagicMock()
         parent.resize = MagicMock()
         load_ui("/test/embed.ui", parent)
 
-        mock_vbox_cls.assert_called_with(parent)
-        mock_container.setContentsMargins.assert_called_with(0, 0, 0, 0)
-        mock_container.addWidget.assert_called_with(mock_ui)
+        mocks.mock_vbox_cls.assert_called_with(parent)
+        mocks.mock_container.setContentsMargins.assert_called_with(0, 0, 0, 0)
+        mocks.mock_container.addWidget.assert_called_with(mocks.mock_ui)
         parent.setWindowTitle.assert_called_with("Embedded UI")
         parent.resize.assert_called_with(QSize(300, 200))
 
 
-@pytest.mark.path_support
-def test_load_ui_accepts_path_object():
-    """1.2.10: load_ui() accepts both str and Path for ui_file_path.
+class TestLoadUIPathSupport:
+    """1.2.10: Path type acceptance."""
 
-    The function should work with pathlib.Path objects as well as strings,
-    passing them through to QFile constructor unchanged.
-    """
-    with (
-        patch("ui_loader.QFile") as mock_qfile_cls,
-        patch("ui_loader.QUiLoader") as mock_loader_cls,
-        patch("ui_loader.QVBoxLayout") as mock_vbox_cls,
-    ):
-        mock_qfile = MagicMock()
-        mock_qfile_cls.return_value = mock_qfile
-        mock_qfile.open.return_value = True
-
-        mock_ui = MagicMock()
-        mock_ui.layout.return_value = None
-        mock_ui.windowTitle.return_value = ""
-        mock_ui.size.return_value = QSize(0, 0)
-
-        mock_loader = MagicMock()
-        mock_loader.load.return_value = mock_ui
-        mock_loader_cls.return_value = mock_loader
+    def test_load_ui_accepts_path_object(self, mock_qt):
+        """1.2.10: load_ui() accepts both str and Path for ui_file_path."""
+        mocks = mock_qt()
 
         parent = QWidget()
         result = load_ui(Path("/test/path.ui"), parent)
 
-        # Verify QFile was called with the Path object
-        mock_qfile_cls.assert_called_with(Path("/test/path.ui"))
-        assert result is mock_ui
+        mocks.mock_qfile_cls.assert_called_with(Path("/test/path.ui"))
+        assert result is mocks.mock_ui
