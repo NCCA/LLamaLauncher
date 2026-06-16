@@ -1,9 +1,6 @@
 ---
-description: Use when writing or maintaining Python tests with pytest.
-  Focuses on pytest patterns, fixtures, assertions, parametrization,
-  mocking, test maintainability, and using nox for advanced test
-  workflows.
 name: pytest-best-practices
+description: Use when writing or maintaining Python tests with pytest.
 ---
 
 # Pytest Best Practices
