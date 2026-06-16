@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from config_collector import ConfigCollector
+from .config_collector import ConfigCollector
 
 # ------------------------------------------------------------------
 # Simple widget data classes (no Qt dependencies)
