@@ -19,6 +19,12 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 qt_api = "pyside6"
+markers = [
+    "file_errors: Error handling when UI files cannot be loaded",
+    "widget_assignment: Widget and layout attribute assignment by objectName",
+    "parent_type_setup: Widget setup for different parent widget types",
+    "path_support: Path type acceptance",
+]
 
 [tool.coverage.run]
 source = ["src", "."]
