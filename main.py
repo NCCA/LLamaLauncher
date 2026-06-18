@@ -243,7 +243,7 @@ class LlamaLaunchApp(QMainWindow):
             "port": int(self.port_line_edit.text())
             if self.port_line_edit.text().isdigit()
             else 8080,
-            "api_key": self.api_key_line_edit.text(),
+            "api_key": self.api_key_line_edit.text() or "12345",
         }
 
         # Sampling parameters
