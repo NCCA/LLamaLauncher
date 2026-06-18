@@ -13,8 +13,7 @@ Following the Testing.md Phase 3 plan:
 from typing import Any
 from unittest.mock import MagicMock
 
-from process_command import ProcessCommandBuilder
-
+from .process_command import ProcessCommandBuilder
 from .test_config import (
     MockCheckBox,
     MockComboBox,
